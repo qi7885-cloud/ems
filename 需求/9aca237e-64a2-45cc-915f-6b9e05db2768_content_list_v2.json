@@ -1,0 +1,1266 @@
+[
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "引言",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 1
+            },
+            "anchor": "_Toc42156880"
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.1 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "目的和范围",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 2
+            },
+            "anchor": "_Toc42156881"
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "软件需求说明书旨在明确说明项目包括的所有软件功能需求和非功能需求，系统设计员可以根据此文档进行系统设计，编码人员可以根据此文档及设计文档进行程序代码开发，测试人员能够根据此文档编写测试案例。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "本文档的预期读者有：需求分析人员、系统设计人员、编码人员、测试人员、质量控制人员，需求评审人员、最终用户或用户代表等。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "本文档适用于综合项目工程信息统计的开发过程，为后续系统设计、编码和测试等工作起到指导作用。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.2 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "参考资料",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 2
+            },
+            "anchor": "_Toc287457744"
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>资料名称</strong></p></td><td><p><strong>出版单位</strong></p></td><td><p><strong>作  者</strong></p></td><td><p><strong>日  期</strong></p></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.3 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "术语和缩略语",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 2
+            },
+            "anchor": "_Toc82339513"
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>术语、缩略语</strong></p></td><td><p><strong>解释说明</strong></p></td></tr><tr><td><p>EMS</p></td><td><p>能源管理系统（Energy Management System）：用于监控、控制和优化能源系统中的能量流动和能源消耗。</p></td></tr><tr><td></td><td></td></tr><tr><td></td><td></td></tr><tr><td></td><td></td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1.4 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "文档约定",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 2
+            },
+            "anchor": "_Toc231102003"
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "无"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "系统概述",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 1
+            },
+            "anchor": "_Toc42156885"
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.1 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "项目背景",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 2
+            },
+            "anchor": "_Toc42156886"
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "造纸业作为一个能源密集型行业，其生产过程中消耗大量的电力、水等能源。随着能源成本的不断上升以及环境保护压力的增大，如何有效地管理和节约能源使用，提高能源使用效率，成为企业持续发展的关键因素之一。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "近年来，随着物联网、大数据、人工智能等技术的发展，智慧能源管理逐渐成为可能。通过实时监测能源消耗数据，深度分析能源利用效率，可以实现能源的高效利用和成本节约。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "因此通过引入EMS智慧能源管理系统，实现能源的高效利用和成本节约，提高企业的经济效益和市场竞争力。同时，该项目还有助于提高企业的能源管理水平，促进企业的可持续发展。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2.2 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "建设目标",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 2
+            },
+            "anchor": "_Toc42156887"
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "能源消耗可视化： 通过实时监控和历史数据记录，使能源消耗情况一目了然，提高能源使用的透明度。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "能源使用效率提升： 通过分析能耗数据，识别能源浪费的环节，优化生产过程和能源使用结构，提升能源使用效率。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "成本节约： 通过有效的能源管理和优化措施，降低能源消耗，从而显著减少能源成本支出。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "环境友好： 降低能源消耗和减少废物排放，减轻对环境的影响，提高企业的社会责任形象。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "决策支持： 提供丰富的能耗分析报告和趋势预测，为企业管理层提供科学的数据支持，帮助制定更有效的能源策略和决策。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "合规性： 确保企业在能源使用上遵守相关的法律法规要求，避免因违规而产生的经济损失和品牌损害。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "持续改进： 建立起持续监测和改进的机制，通过不断的数据分析和反馈，持续推动能源管理和使用效率的提升。"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "功能需求清单",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 1
+            },
+            "anchor": "_Toc42156889"
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>一级功能</strong></p></td><td><p><strong>二级功能</strong></p></td><td><p><strong>三级功能</strong></p></td><td><p><strong>功能描述</strong></p></td></tr><tr><td><p>综合看板</p></td><td><p>数据大屏</p></td><td><p>数据大屏</p></td><td><p>提供快速了解整个造纸厂能耗状态的仪表盘，展示了关键能耗指标、能耗趋势、SOE报警情况等重要信息。</p></td></tr><tr><td rowspan=\"10\"><p>实时监控</p></td><td rowspan=\"5\"><p>实时监测</p></td><td><p>配电监测</p></td><td><p>实时监测配电系统的运行状态，包括电流、电压、功率等参数，以确保供电的稳定性和安全性。</p></td></tr><tr><td><p>变压器监测</p></td><td><p>实时监测变压器的运行状态，包括温度、负载率、油位等参数，以防止变压器过载或故障。</p></td></tr><tr><td><p>分类能耗监测</p></td><td><p>按部门、区域、设备等分类，实时监测各类能耗数据，以便于发现能耗异常和节能潜力。</p></td></tr><tr><td><p>监测参数查询</p></td><td><p>提供历史监测数据的查询功能，支持按时间、地点、设备等多种条件进行查询。</p></td></tr><tr><td><p>离线事件</p></td><td><p>记录系统离线事件，包括离线时间、原因等信息，以便于事后分析和改进。</p></td></tr><tr><td rowspan=\"5\"><p>告警管理</p></td><td><p>设备故障</p></td><td><p>记录设备故障事件，包括故障时间、原因、处理结果等信息，以便于事后分析和改进。</p></td></tr><tr><td><p>用能预警</p></td><td><p>根据设定的阈值，对异常能耗进行预警，提醒用户及时处理。</p></td></tr><tr><td><p>报警分级</p></td><td><p>根据报警的严重程度，将报警分为不同的级别，以便于用户优先处理严重报警。</p></td></tr><tr><td><p>报警分析</p></td><td><p>对历史报警数据进行统计和分析，找出报警的主要原因和规律，以便于改进系统。</p></td></tr><tr><td><p>短信日志</p></td><td><p>记录发送短信的日志，包括接收人、发送时间、短信内容等信息。</p></td></tr><tr><td rowspan=\"7\"><p>能耗统计</p></td><td rowspan=\"4\"><p>统计数据</p></td><td><p>集抄报表</p></td><td><p>汇总各类能耗数据，生成日报、月报、年报等报表。</p></td></tr><tr><td><p>运行报表</p></td><td><p>记录系统的运行状态和参数，生成日报、月报、年报等报表。</p></td></tr><tr><td><p>分时段报表</p></td><td><p>按小时、日、月、年等时段，生成能耗报表，以便于分析能耗变化趋势。</p></td></tr><tr><td><p>能耗数据补录</p></td><td><p>提供能耗数据的补录功能，以便于修正错误的数据。</p></td></tr><tr><td rowspan=\"3\"><p>用能费用</p></td><td><p>电度电费</p></td><td><p>计算电度电费，包括基本电费、电量电费、附加电费等项目。</p></td></tr><tr><td><p>力调电费</p></td><td><p>计算力调电费，即因功率因数不达标而产生的电费。</p></td></tr><tr><td><p>综合水费</p></td><td><p>计算综合水费，包括基本水费、排污费、水资源费等项目。</p></td></tr><tr><td rowspan=\"6\"><p>能耗分析</p></td><td rowspan=\"5\"><p>用能诊断</p></td><td><p>能源流向</p></td><td><p>展示能源在生产过程中的流向和转化关系，以便于了解能源的使用情况。</p></td></tr><tr><td><p>能耗状态分析</p></td><td><p>对比能耗工作与非工作状态数据，分析变化趋势。</p></td></tr><tr><td><p>能耗同比分析</p></td><td><p>对比本期与上一期的能耗数据，分析能耗的变化趋势。</p></td></tr><tr><td><p>能耗环比分析</p></td><td><p>对比本期与上期的能耗数据，分析能耗的变化趋势。</p></td></tr><tr><td><p>最大需量分析</p></td><td><p>分析最大需量的变化趋势，以便于合理安排用电计划。</p></td></tr><tr><td><p>损耗分析</p></td><td><p>损耗分析</p></td><td><p>分析电能的损耗情况，包括线损、变损、管理损耗等项目。</p></td></tr><tr><td rowspan=\"12\"><p>系统管理</p></td><td><p>用能价格管理</p></td><td><p>用能价格管理</p></td><td><p>管理用能价格，包括电价、水价、气价等信息的录入和查询。</p></td></tr><tr><td><p>设备管理</p></td><td><p>设备管理</p></td><td><p>管理各类设备的信息，包括设备名称、型号、厂家、安装日期等。</p></td></tr><tr><td rowspan=\"4\"><p>状态管理</p></td><td><p>通讯状态</p></td><td><p>实时监测系统内部的通讯状态，包括网络连接、数据传输等情况。</p></td></tr><tr><td><p>仪表通讯状态</p></td><td><p>实时监测仪表设备的通讯状态，包括连接状态、信号质量、数据传输速率等参数。</p></td></tr><tr><td><p>网关通讯状态</p></td><td><p>实时监测网关设备的通讯状态，包括连接状态、信号质量、数据传输速率等参数。</p></td></tr><tr><td><p>服务器运行状态</p></td><td><p>实时监测服务器的运行状态，包括硬件状态、软件运行状况、网络连接、资源占用率等参数。</p></td></tr><tr><td><p>用户报告</p></td><td><p>用户报告</p></td><td><p>向用户提供关于能源使用情况的详细报告，包括能源消耗数据、成本分析、能效评估等关键信息。</p></td></tr><tr><td rowspan=\"2\"><p>日志</p></td><td><p>操作日志</p></td><td><p>记录用户的操作行为，包括操作时间、操作内容、操作结果等信息。</p></td></tr><tr><td><p>控制日志</p></td><td><p>记录系统的控制行为，包括控制时间、控制内容、控制结果等信息。</p></td></tr><tr><td><p>用户管理</p></td><td><p>用户管理</p></td><td><p>创建、编辑、删除和授权用户账号，为不同的员工或用户组分配不同的账户和密码，并设置相应的访问级别。</p></td></tr><tr><td><p>权限管理</p></td><td><p>权限管理</p></td><td><p>定义和管理不同的用户角色及其对应的权限集，为不同的职务或职责分配特定的权限。</p></td></tr><tr><td><p>菜单管理</p></td><td><p>菜单管理</p></td><td><p>定制和控制用户界面的菜单结构和内容，根据不同角色的需求，定制个性化的操作界面。</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4 "
+                    },
+                    {
+                        "type": "text",
+                        "content": "软件功能设计",
+                        "style": [
+                            "bold"
+                        ]
+                    }
+                ],
+                "level": 1
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>系统登录</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><ol><li>提供用户账号密码登录功能</li><li>支持用户忘记密码找回功能（联系管理员重置密码）</li></ol></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>所有角色</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>用户账号、密码、验证码</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>登录结果（成功则展示该用户拥有角色权限页面内容，失败则弹出提示无法进入系统）</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>系统及网络正常</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>支持登录密码展示/隐藏</li><li>点击验证码图片自动刷新</li><li>输入账号、密码、验证码后，登录按钮可点击</li><li>点击登录按钮时进行账号、密码、验证码校验</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><ol><li>适配性：应支持不同分辨率和设备的适配，保证在手机、平板和桌面等设备上的良好显示效果。</li></ol></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ab2d2cf6238f5ae59e07f6d9f2c45acc37ad5efcd1b6246a0b355f59c7229070.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>侧边导航栏</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>为用户提供一个界面上的导航工具，通过侧边导航栏快速切换不同的页面或功能模块。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>所有角色</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>用户选择的导航项</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>对应导航项的页面或功能模块</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>用户已成功登录系统</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>侧边导航栏应包含所有主要功能模块的入口。</li><li>导航栏应根据用户的权限动态显示可访问的功能模块。</li><li>提供折叠功能，以便用户在需要更多屏幕空间时，可以隐藏导航栏。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><ol><li>响应时间：用户点击导航项后，对应页面或功能模块应在1秒内完成加载。</li><li>易用性：导航栏的设计应直观易懂，用户可通过图标或文字理解各导航项代表的功能。</li><li>适配性：导航栏应支持不同分辨率和设备的适配，保证在手机、平板和桌面等设备上的良好显示效果。</li></ol></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/eeb4a202d3d7d95dc8ea602230b2ba82d38ac981d3ded321b94e3e4d8cda9369.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>综合看板</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>提供一个快速了解整个造纸厂能耗状态的仪表盘，展示了关键能耗指标、能耗趋势、SOE报警情况等重要信息。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、工厂管理层</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>实时能耗数据、系统预警信息、设备运行状态</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>综合展示的看板视图，包括但不限于能耗实时数据、趋势图、预警信息板块、设备状态指示。 </p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>系统与设备皆正常运行</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>看板自动更新，确保显示信息的实时性和准确性。</li><li>支持用户自定义看板内容和布局，以满足不同用户的监控偏好。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><ol><li>高可用性：综合看板需保证高可用性和数据更新的及时性。</li><li>易用性：界面友好，信息展示直观，便于用户快速理解和操作。</li><li>响应性：界面响应快速，用户操作后能即时反馈。</li></ol></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/490ea377426dd13ec47ca68a901798ef03a29cf37835dc025c8e569b7655c85d.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>配电监测</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测配电系统的运行状态，包括电流、电压、功率等参数，以确保供电的稳定性和安全性。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>技术支持人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各区域进线图</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>配电系统运行状态，包含电流、电压、功率等</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>系统与设备正常运行</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8ac139887697566c65e4f76b3d04a693fa8e429a81393f5ef30c5507aa35b7c4.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>变压器监测</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测变压器的运行状态，包括温度、负载率、电流、电压等参数，以防止变压器过载或故障。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>技术支持人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>变压器数据</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>变压器具体信息，如温度、负载率、电流、电压等</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>变压器正常运行未断线</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>系统需自动从连接的能源监测设备中收集数据。</li><li>支持趋势图展示/隐藏，便于按需进行数据对比。</li><li>对于异常数据，系统应存在异常提示并提醒相关人员。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>支持不同分辨率和设备的适配，保证在手机、平板和桌面等设备上的良好显示效果。</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/58a8481b7b2b3bdd753a9dd6b45d2f066cef68478a9b1bc3b28a3a64619ba20a.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>分类能耗监测</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>按部门、区域、设备等分类，实时监测各类能耗数据，以便于发现能耗异常和节能潜力。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各设备或流程的能源使用数据</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>分项的能耗数据展示，包括图表和数字汇总</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>相关设备或流程安装有能源监测设备并成功连接至EMS系统</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>系统自动从连接的能源监测设备中收集数据。</li><li>支持用户按设备、流程或能源类型进行数据筛选和查看。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>支持不同分辨率和设备的适配，保证在手机、平板和桌面等设备上的良好显示效果。</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/e1f90bafea1891e086197cacfd369e906b9cb719484294aa779aaac1186add31.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/f63489e488b7345f0451cd6b4dd5ef9372d9e00411933787c4260b398b0cde65.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>监测参数查询</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>提供历史监测数据的查询功能，支持按时间、地点、设备等多种条件进行查询。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件（时间范围、能源参数等）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>所选条件下能源参数数据</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号具有检测参数查询页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>用户可根据需要选择查询的时间范围和设备。</li><li>系统提供实时和历史数据查询功能。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/7a97d094320f62642fbe3864703ca2114a0ac63151994f801407bee19df02371.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>离线事件</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>记录系统离线事件，包括离线时间、原因等信息，以便于事后分析和改进。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员、数据管理员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件（时间范围、事件类型、设备编号等）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>所选条件下对应离线时间数据信息</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号具有离线事件页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>系统提供实时和历史数据查询功能。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a970832a26c65525f244be71d5d91179dd05b9c933365e5643b42209f1c2b0d5.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>设备故障</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测和记录设备运行状态，一旦发现设备故障，即时通知维护团队进行处理。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>设备管理人员、维护团队</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件（设备状态信息）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>故障报警信息，包括故障类型、位置、发生时间等</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>登录账号具有设备故障页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>所有监测到的设备故障都需要记录在系统中，包括故障处理的详细信息。</li><li>故障信息需分类管理，便于维护团队优先处理重大故障。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/29727098cb044bfcdc28c5264fded3c8aa53c31c67e5b6f23e9af1c2a9b701ea.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/3c0c5a9240a9e405cdb391a8ec4428656915a83b8ab49d0f66a9d5bbd4ff4a85.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>用能预警</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><ol><li>对能源使用情况进行实时监控，一旦发现异常用能行为或即将超出预设阈值，立即发出预警。</li><li>允许用户进行预警配置，包括设备、条件、状态等内容。</li></ol></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件、实时能耗数据、能耗预警配置信息</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>用能预警信息、能耗预警配置信息列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><ol><li>账户具有用能预警页面权限</li><li>系统已设定用能阈值</li></ol></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>系统实时分析能耗数据，与预设的节能目标或阈值进行比较。 </li><li>当用能数据超过阈值时，系统自动生成预警信息，提示管理人员及时调整。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/24ab8f7b975bed4009d8235bea02b49f160729837e961a612eeb42a3e9f01be9.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/55450390135b2a6887240aaaafde64a867d0abbd58bf15b4918a30a0acc46329.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a968844d1c7ea290e10811e7e9e4a894d43cde7a8d133d462ad2938f3f820b2b.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>报警分级</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>根据报警事件的严重程度，自动将报警信息分级，以便采取相应的响应措施。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>安全管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件（报警信息）、报警信息配置条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>分级后的报警信息、报警信息配置结果列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><ol><li>系统预设了报警分级标准</li><li>账号拥有报警分级权限</li></ol></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>报警信息根据预设的标准自动分类为多个等级，如普通、一般、严重等。</li><li>不同等级的报警采取不同的响应措施，如紧急报警需要立即处理。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/325daa59017e684291e3bf5cd142f82f3a54c754c0ae4cc77275aae853f65167.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/d49f0ec8886889bbbbb34fe27cc2e4915e47d9b4d8ef49cd33c0664ffa03171d.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/208fe0e6a6957dc6322d83b4aff150ca81b5204b82f102ac788158ad2a475eb0.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>报警分析</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>对历史报警数据进行统计和分析，以图表形式展示不同维度分析结果，找出报警的主要原因和规律。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>安全管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>全历史报警数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>报警分析报告，包括常见报警类型、频发区域、潜在风险点等</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有报警分析页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>分析报告应包括报警频次、类型、处理时间、发生区域等关键信息。</li><li>根据分析结果，提出改进措施和预防策略。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/79fde53238100e7c080bbb849fcbb158803eca640039281121ee6bb6655e4a33.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>短信日志</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><ol><li>记录系统发送的所有短信通知，包括用能预警、设备故障报警等，便于后续的审计和验证。</li><li>允许用户进行短信日志条件配置，包括触发规则、内容等</li></ol></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员、安全管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件（发送的短信内容、接收人手机号、发送时间）、短信配置条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>短信发送记录、短信配置结果信息列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.账号拥有短信日志权限</p><p>2.系统接入短信发送功能</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>所有发送的短信都必须记录在短信日志中。</li><li>短信日志应包含详细的发送时间、内容和接收人信息。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/17b2f9fc68ee83403b2829a12c7c5ea216f307471fa30c2604ad681f26f618d7.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a27ae5821d92eaf6f605ca84d0025c9ae83fb34287d3695dfa400ccf126d60c6.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/041023e74614090a12ce89da6064a479bd2650844827be056f95004e4dc9c3f5.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>集抄报表</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>自动收集并记录各能源计量设备（如电表、水表等）的读数，实现能源使用数据的集中管理和分析。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>能源计量设备的原始数据、查询条件（区域、数据粒度、时间区间等）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>设备上传原始数据列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><ol><li>所有能源计量设备已接入系统并进行了正确配置</li><li>账号拥有集抄报表权限</li></ol></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>每日定时自动执行数据采集任务。</li><li>确保数据的完整性和准确性，对于读数异常的情况应进行标记并通知管理人员。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/695911719c109938397c7254270d50fd56e3c86ed4c29a5c0f9ce022b99a48da.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/5ddbdd8cb9738f1ff43b88e7357ca7c9e02d1641a6e190d7f1cd7e4878d1164f.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>运行报表</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>自动收集并记录各能源计量设备（如电表、水表等）运行数据，实现能源运行数据的集中管理和分析。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>能源计量设备运行数据、查询条件（区域、日期、时间间隔等）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>设备运行数据列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.所有能源计量设备已接入系统并进行了正确配置</p><p>2.账号拥有运行报表权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>每日定时自动执行数据采集任务。</li><li>确保数据的完整性和准确性，对于读数异常的情况应进行标记并通知管理人员。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/b28562048c1b1eec141851573ac08c598f7cd87c83501e39c7947c8cba3caf5c.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8f27d742864a2225a9caa6c5dac8833b3805f7b321d923180628fbe2bdc58c68.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>分时段报表</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>监测并记录不同时间段（如峰谷时段）的电能使用情况，以优化用电结构和降低电费成本。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>用电量监测数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>各时段用电量统计数据</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><ol><li>电能计量设备正常运行，数据正常上报</li><li>账号拥有分时段报表权限</li></ol></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2d7e6757c8879ba9a76b7d1dda373a0e6d542d31d92d8d238ea7d86b9ff09084.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>能耗数据补录</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><ol><li>为没有自动数据采集设备的能源使用点提供手动录入能耗数据的功能，保证能耗监控的完整性。</li><li>允许用户下载模板进行批量导入</li></ol></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>查询条件、手工录入的能耗数据，包括能源类型、消耗量、记录时间等</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>录入后的能耗数据汇总和统计</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有能耗数据补录权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>确保手工录入的数据格式与自动采集的数据保持一致。</li><li>录入数据需经审核确认后方可计入总能耗统计。</li></ol><p>3.允许用户进行录入数据查看</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/bdf2892cf79d2b7b0191234a62786dc4189e60cc24997b8419a1a0fc95af2a9c.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/b0803a923e8bfe0be57a746f34704565f930835c2d914d27db45288828d393d2.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>电度电费</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>计算电度电费，包括基本电费、电量电费、附加电费等项目。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各智能电表记录电能数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>电度电费数据及分析图表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有电度电费页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/e9f7cde90d0a91837c6252d1898367fb7b712c3c5668640eee529f39e7df94b9.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/866a3719615457443e7004430f030980e235bfdfd599636117390f1bc7a764c7.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>力调电费</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>计算力调电费，即因功率因数不达标而产生的电费。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各智能电表记录电能数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>力调电费数据及分析图表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有力调电费页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ffc3188c7d1db9ffa92816bf0ce24c2a5b63888abdc577952ca3a6c4843c1b9e.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/726207bff13af21f2cff5c6c4c877a5e0cc9902e4b06415bd171df291bfeacef.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>综合水费</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>计算综合水费，包括基本水费、排污费、水资源费等项目。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各智能水表记录用水数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>综合水费数据及分析图表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有综合水费页面权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/62436648da336a5a42d4e5ff6847a4e0fcb228b6d3c838d2c5767718b0d01bf2.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8eed49ddd7bb54a49264dd23970889305a40a09d5770990e4e7bc8ec50121ff3.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>能源流向图</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>通过可视化的方式展示能源在整个工厂或特定区域内的流动情况，包括能源的来源、分配和使用终点。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>能源使用和分配的数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>能源流向的图形表示</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.系统已收集并整理能源使用和分配的相关数据</p><p>2.账号拥有能源流向图权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>能源流向图需准确反映不同能源类型的流动路径。</li><li>图中应标明主要的能源使用节点和能源流量。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2dc481d61bbacebb54909aef7dc7fd53ee24d0034e3f8756f7c0ade4997fe74c.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>能耗状态分析</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>对比能耗工作与非工作状态数据，分析变化趋势。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>工作与非工作状态能耗数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>能耗状态分析图表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.系统已收集足够的历史能耗数据</p><p>2.账号拥有能耗状态分析权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2414bb9b8240b34e44cf0b8c249e4638e09d02adb18be1568770db6125a80f90.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>能耗同比分析</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>对比当前时间段内的能耗数据与历史同期的能耗数据，分析能耗变化趋势。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、工厂管理层</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>当前和历史同期的能耗数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>能耗状态分析图表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.系统已收集足够的历史能耗数据</p><p>2.账号拥有能耗同比分析权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>同比分析需考虑季节性和工作日数量的影响，确保比较的公平性。</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/8598f4a44a0098c133635f242fa89935e67c8b21ed009a129bce6fbc59a32ea6.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/c2c29135b97df9e732a280fc4594356c8b17a5a3ed09a21fa37cfedd6de2bb7f.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>能耗环比分析</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>比较连续两个时间段（如月与月、日与日）的能耗数据，以识别能耗的短期变化趋势。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、工厂管理层</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>连续两个时间段的能耗数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>环比能耗变化的分析报告，包括图表和文字说明</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.系统已收集连续的能耗数据</p><p>2.账号拥有能耗环比分析权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>分析需调整因季节变化或特殊事件导致的能耗波动。</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/098d0445cb12a36cc19ecbf6fbb8dc5349b64ae146f0ed4288f6d65182b29e76.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/cc94774dae3df63b15db32772aaf92977c48e57f8a4b4bac31a6e521276119cc.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>最大需量分析</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>分析最大需量的变化趋势，以便于合理安排用电计划。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、工厂管理层</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>全历史智能电表采集数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>各区间不同时间段最大需量数据（时间颗粒度日）</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号具有最大需量分析权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/9013f5990110298cb55f73f940e9110c3002a72bb2c63fd1ef7fe0b17b84a949.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>损耗分析</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>分析能源在传输和分配过程中的损耗，识别能源损耗的主要环节，为优化能源使用提供依据。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>能源管理人员、设备管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>能源传输和分配的相关数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>损耗分析报告，包含主要损耗环节及其损耗率</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.系统已收集完整的能源使用及传输数据</p><p>2.账号拥有损耗分析权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>根据能源流动路径计算各环节的能源损耗。</li><li>对比分析各环节的损耗率，识别损耗较大的环节。</li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/f0c30fac599eaeb3b36de93260c68b170d6951566384ec3b024f7b281b8733e9.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>用能价格管理</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>管理用能价格，包括电价、水价、气价等信息的录入和查询。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>用能价格方案、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>用能价格数据</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有用能价格管理权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无 </p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ada41243447e230b8d540767fdb415e967b4a2288bc765f513a56e874460ba86.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/cee99c01f4cf0dedf29edbfe49b10efc0ade613cedf910ccfabcac6cf40dc66a.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>设备管理</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>管理各类设备的信息，包括设备名称、型号、厂家、安装日期等。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>设备管理员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>设备信息、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>设备信息列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号具有设备管理权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无 </p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a90bb3c18906eb09fb89f3e5c83a2259a4bf0bd8bdd34fc10a44f277d9358568.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/601e2033cee47060a1f7412f1d5a656a957c6c79b536424526d6426ba6a3d74d.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>通讯状态图</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测系统内部的通讯状态，包括网络连接、数据传输等情况。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>技术支持人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各区域通讯状态信息、查询条件（区域信息）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>对应区域通讯状态图</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有通讯状态图权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/96ba6b5841b6b07ffe168769f9f83fb5186d8e77824142cd1b7f442583cff394.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>仪表通讯状态</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测仪表设备的通讯状态，包括连接状态、信号质量、数据传输速率等参数。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>技术支持人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各仪表通讯状态信息、查询条件（仪表信息、通讯状态信息）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>对应仪表通讯状态信息</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有仪表通讯状态权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/326e240daf5de107cd39cc8eb63b523d529cb4965c04c62d825624a345ebeb32.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>网关通讯状态</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测网关设备的通讯状态，包括连接状态、信号质量、数据传输速率等参数。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>技术支持人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>各网关通讯状态信息、查询条件（网关信息、通讯状态信息）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>对应网关通讯状态信息</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有网关通讯状态权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/9325d2b1aa6951bdce19ecca52c54d44cee0e05bd59db0d40f96ea151c3b0d7b.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>服务器运行状态</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>实时监测服务器的运行状态，包括硬件状态、软件运行状况、网络连接、资源占用率等参数。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>技术支持人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>服务器运行状态、报警阈值配置</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>服务器运行状态数据</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有服务器运行状态权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/e9d5fc1ed1af10d2fccef27bc15b872a454768dc0efdd461989f7a3cf513815b.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ca93b18fc473722c76f9277ace99b113a8b90d8758edd2e2540d77c26c425fea.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>用户报告</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>向用户提供关于能源使用情况的详细报告，包括能源消耗数据、成本分析、能效评估等关键信息。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员、工厂管理层、能源管理人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>生成用户报告相关数据、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>用户报告</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有用户报告权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>根据模板生成用户报告，允许用户进行内容更改</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/465996f0ba9284d7c365398d46ab66f269f29412c92d6abd51978f7a8e7a7ca9.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/30a75f491b3632fb36548294aa60dd72190e45212fe7211777e211cd2aea5363.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>日志查询</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>提供系统操作日志、控制日志的查询功能，包括用户操作、系统事件、错误日志等，方便进行系统监控和故障排查。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员、技术支持人员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>系统操作信息、设备控制信息、查询条件（时间范围、日志类型、用户ID等）</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>符合条件的日志记录</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>1.系统自动记录操作和事件日志</p><p>2.账号拥有操作日志、控制日志权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/2ee3be5adc6ae7c36a5c2622d18be06a8572b21b06a3c3e9869c6bb6a58a050a.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/94cee3bee9a2a7885aa95f0245a6a6656e80366f200d85d8bb0fbeac2de4063a.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>用户管理</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>创建、编辑、删除和授权用户账号，为不同的员工或用户组分配不同的账户和密码，并设置相应的访问级别。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>用户信息、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>用户信息列表</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有用户管理权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>系统应支持角色基础的权限管理，允许为不同角色分配不同的访问权限。</li><li>管理员可以随时添加、修改或删除用户权限。 </li></ol><p>3.超级管理员为系统默认存在用户，不可删除。</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/a842a6fbf21b1cd4a556ce99f56946513e113bb8ef0a1f78aa1d8dcd5c5ef3c8.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ac17cc8b7ad0c88b17973405694e5a9a99527e7991e49218bb206aecf9c9901a.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>权限管理</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>定义和管理用户对系统功能的访问权限，确保数据安全和操作权限的合理分配。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>用户角色、权限级别、授权功能、查询条件</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>权限配置状态</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><ol><li>系统应支持角色基础的权限管理，允许为不同角色分配不同的访问权限。</li><li>管理员可以随时添加、修改或删除角色权限。 </li></ol></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/b648db30403ef101079de7f67a6dc0a21c3fd70893f62f81070b20c1410aa160.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/1a1771b21ed45ff192a38f848b72d186e3f4eb223e625666e821d16682df7bae.png"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "table",
+            "content": {
+                "table_caption": [],
+                "html": "<table><tr><td><p><strong>应用功能名称</strong></p></td><td colspan=\"3\"><p>菜单管理</p></td></tr><tr><td><p><strong>使用频率</strong></p></td><td><p>每日多次</p></td><td><p><strong>并发用户</strong></p></td><td><p>50</p></td></tr><tr><td><p><strong>功能描述</strong></p></td><td colspan=\"3\"><p>定制和控制用户界面的菜单结构和内容，根据不同角色的需求，定制个性化的操作界面。</p></td></tr><tr><td><p><strong>参与者</strong></p></td><td colspan=\"3\"><p>系统管理员</p></td></tr><tr><td><p><strong>输入数据</strong></p></td><td colspan=\"3\"><p>菜单信息</p></td></tr><tr><td><p><strong>输出数据</strong></p></td><td colspan=\"3\"><p>菜单配置结果</p></td></tr><tr><td><p><strong>前提条件</strong></p></td><td colspan=\"3\"><p>账号拥有菜单管理权限</p></td></tr><tr><td><p><strong>业务规则</strong></p></td><td colspan=\"3\"><p>无</p></td></tr><tr><td><p><strong>非功能需求</strong></p></td><td colspan=\"3\"><p>无</p></td></tr></table>",
+                "table_type": "complex_table",
+                "table_nest_level": 1
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/49384074e7cf39fc87dbcbc1c3487b6c405dd9a637b2f51869ed41aa7aad77f8.jpg"
+                },
+                "image_caption": []
+            }
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/63eec159856d2154ab74ee0cad1ceb4773e567dca798be94d9ef3ae3f8bbf5b2.png"
+                },
+                "image_caption": []
+            }
+        }
+    ]
+]
