@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMS 能源管理系统 · 修复完成报告</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f6f7f9; color: #1f2937; line-height: 1.65;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 28px 80px; }
+
+  header { margin-bottom: 36px; }
+  .eyebrow { font-size: 13px; letter-spacing: .12em; color: #059669; font-weight: 700; text-transform: uppercase; }
+  h1 { font-size: 32px; margin: 8px 0 10px; letter-spacing: -.02em; }
+  .sub { color: #6b7280; font-size: 15px; }
+  .meta { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: #fff; border: 1px solid #e5e7eb; border-radius: 999px; padding: 5px 13px; font-size: 13px; color: #4b5563; }
+  .chip b { color: #111827; }
+
+  .banner {
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
+    border: 1px solid #a7f3d0; border-radius: 14px; padding: 24px 28px; margin-bottom: 40px;
+  }
+  .banner h2 { margin: 0 0 8px; font-size: 19px; color: #065f46; }
+  .banner p { margin: 0; color: #047857; font-size: 15px; }
+
+  h2.sec { font-size: 21px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sec-desc { color: #6b7280; font-size: 14px; margin: 0 0 20px; }
+  section { margin-bottom: 44px; }
+
+  /* 指标对比 */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .metric { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px; }
+  .metric .label { font-size: 13px; color: #6b7280; margin-bottom: 10px; }
+  .metric .before { font-size: 14px; color: #b91c1c; text-decoration: line-through; text-decoration-color: #fca5a5; }
+  .metric .after { font-size: 24px; font-weight: 700; color: #059669; letter-spacing: -.02em; margin-top: 2px; }
+  .metric .unit { font-size: 14px; font-weight: 500; color: #6b7280; margin-left: 3px; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; font-size: 14px; }
+  th { background: #f9fafb; text-align: left; padding: 12px 16px; font-weight: 650; color: #374151; border-bottom: 1px solid #e5e7eb; font-size: 13.5px; }
+  td { padding: 11px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code, p code, li code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: #f3f4f6; padding: 1px 5px; border-radius: 4px; }
+
+  .fix { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 22px; margin-bottom: 10px; }
+  .fix-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .fix-head .tag { font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 3px 8px; border-radius: 6px; background: #fee2e2; color: #b91c1c; flex-shrink: 0; margin-top: 2px; }
+  .fix-head .tag.p1 { background: #ffedd5; color: #c2410c; }
+  .fix-head .tag.p2 { background: #e0e7ff; color: #3730a3; }
+  .fix-head .tag.opt { background: #f3f4f6; color: #4b5563; }
+  .fix-head .t { font-size: 15.5px; font-weight: 650; }
+  .fix .who { font-size: 12.5px; color: #9ca3af; margin: 0 0 6px; font-family: ui-monospace, Consolas, monospace; }
+  .fix p { margin: 0 0 6px; font-size: 14.3px; }
+  .fix p:last-child { margin-bottom: 0; }
+  .done::before { content: "✓"; color: #059669; font-weight: 700; margin-right: 6px; }
+
+  ul.plain { margin: 0; padding-left: 20px; font-size: 14.3px; }
+  ul.plain li { margin-bottom: 6px; }
+
+  footer { margin-top: 52px; padding-top: 22px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Fix Report</div>
+  <h1>EMS 能源管理系统 · 修复完成报告</h1>
+  <p class="sub">基于上一份审查报告，对全部 22 类问题逐条修复，并补齐构建、类型与工程配置。所有结论均经自动化验证。</p>
+  <div class="meta">
+    <span class="chip">改动文件 <b>39 个</b></span>
+    <span class="chip">新增文件 <b>3 个</b></span>
+    <span class="chip">验证 <b>类型 + Lint + 构建 + 浏览器</b></span>
+    <span class="chip">日期 <b>2026-10-09</b></span>
+  </div>
+</header>
+
+<div class="banner">
+  <h2>✅ 四项验证全部通过，构建阻塞已解除</h2>
+  <p>
+    <code>npm run build</code> 现已可用。浏览器端实测：<b>30 个路由全部正常渲染</b>、<b>11 项核心交互全部生效</b>，全程<b>零控制台错误、零未处理异常</b>。
+  </p>
+</div>
+
+<!-- ========== 指标对比 ========== -->
+<section>
+  <h2 class="sec">修复前后关键指标</h2>
+  <p class="sec-desc">数值均为本机实测。</p>
+  <div class="metrics">
+    <div class="metric">
+      <div class="label">TypeScript 错误</div>
+      <div class="before">3 个（退出码 1）</div>
+      <div class="after">0<span class="unit">个</span></div>
+    </div>
+    <div class="metric">
+      <div class="label">ESLint 问题</div>
+      <div class="before">18 error + 1 warning</div>
+      <div class="after">0<span class="unit">个</span></div>
+    </div>
+    <div class="metric">
+      <div class="label">首屏 JS（gzip）</div>
+      <div class="before">223 KB</div>
+      <div class="after">88<span class="unit">KB</span></div>
+    </div>
+    <div class="metric">
+      <div class="label">构建 chunk 数</div>
+      <div class="before">1 个（1,272 KB）</div>
+      <div class="after">49<span class="unit">个</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 验证结果 ========== -->
+<section>
+  <h2 class="sec">验证结果清单</h2>
+  <table>
+    <thead><tr><th style="width:210px">验证项</th><th style="width:110px">结果</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>tsc -b</code>（含 <code>strict</code>、<code>noUnusedLocals</code>、<code>noUnusedParameters</code>）</td><td class="done" style="color:#059669;font-weight:600">通过</td><td>0 错误。原先被关闭的三项严格检查已全部开启且无新增报错</td></tr>
+      <tr><td><code>eslint .</code></td><td class="done" style="color:#059669;font-weight:600">通过</td><td>0 error / 0 warning</td></tr>
+      <tr><td><code>vite build</code></td><td class="done" style="color:#059669;font-weight:600">通过</td><td>无 chunk 体积告警</td></tr>
+      <tr><td>浏览器路由渲染（30 条）</td><td class="done" style="color:#059669;font-weight:600">30/30</td><td>Headless Chrome 实测，含 404 兜底路由</td></tr>
+      <tr><td>浏览器交互流程（11 项）</td><td class="done" style="color:#059669;font-weight:600">11/11</td><td>登录、持久化、告警处理、价格 CRUD、表单校验、筛选、滑块、空状态等</td></tr>
+      <tr><td>控制台错误 / 未处理异常</td><td class="done" style="color:#059669;font-weight:600">0</td><td>全流程监听 <code>Runtime.exceptionThrown</code> 与 <code>console.error</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== P0 ========== -->
+<section>
+  <h2 class="sec">P0 · 阻塞构建</h2>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag">P0</span><span class="t">Chart.js 字体粗细传字符串导致类型错误</span></div>
+    <p class="who">src/pages/Dashboard.tsx:99 / 174 / 229</p>
+    <p class="done">三处 <code>titleFont.weight: '600'</code> 改为数字 <code>600</code>。同时把圆环图 tooltip 的 <code>callbacks.label</code> 改用官方 <code>TooltipItem&lt;'doughnut'&gt;</code> 类型，消除另一处隐式类型不兼容。</p>
+    <p><b>效果：</b><code>tsc</code> 退出码由 1 变为 0，<code>npm run build</code> 恢复可用。</p>
+  </div>
+</section>
+
+<!-- ========== P1 ========== -->
+<section>
+  <h2 class="sec">P1 · 功能性缺陷（7 项）</h2>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">电费明细与合计自相矛盾</span></div>
+    <p class="who">src/pages/StatisticsElectricFee.tsx</p>
+    <p class="done">建立单一数据源 <code>feeItems</code>，全部金额、合计、圆环占比改为 <code>useMemo</code> 派生，不再手写任何汇总数字。环形图按各项<b>金额占比</b>多段绘制，中心显示真实合计。</p>
+    <p><b>核算：</b>基本 2,000 + 尖峰 12,750 + 高峰 16,750 + 平段 10,400 + 低谷 3,600 = <b>45,500</b>（原页面写 74,000）。页面各处现已一致。</p>
+    <p style="color:#9ca3af;font-size:13px;">（勘误：上一份报告此处误写为「47,500 / 差 26,500」，正确为 45,500，差额 28,500。已在审查报告中标注。）</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">渲染期调用 Math.random() 导致图表抖动</span></div>
+    <p class="who">src/pages/StatisticsOperation.tsx:102、src/pages/Transformer.tsx:148</p>
+    <p class="done">新增确定性伪随机工具 <code>seededSeries</code> / <code>seededValue</code>（mulberry32 + FNV 哈希），同一 key 永远得到同一序列。运行报表柱高、变压器温度趋势全部改为 <code>useMemo</code> 缓存。</p>
+    <p><b>附带修复：</b>变压器趋势原先与所选设备温度完全无关、且永远命中不到红色告警分支，现改为以实际温度为中轴浮动，并按该柱温度判定绿/黄/红。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">监测参数查询：3 个筛选条件里 2 个是摆设</span></div>
+    <p class="who">src/pages/ParameterQuery.tsx</p>
+    <p class="done">设备（精确匹配）、日期区间（比对每行时间）、关键字三种条件全部并入过滤逻辑，包进 <code>useMemo</code>；「查询」改为提交式并反馈命中条数，「刷新」重置全部条件，「导出」实现带 BOM 的 CSV 下载（Excel 中文不乱码）。删除与其他条件重复的「筛选」按钮，过滤为空时显示空状态。</p>
+    <p><b>实测：</b>选择「变压器A」后 2 行结果全部匹配。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">用能预警：保存无效、滑块非受控</span></div>
+    <p class="who">src/pages/EnergyWarning.tsx</p>
+    <p class="done">阈值提升为受控 <code>useState</code>，两个滑块 <code>value + onChange</code> 并做上下限夹取（预警值不得越过告警值）；「保存配置」写入已保存状态并弹出绿色 toast；标题旁显示「有未保存修改 / 已保存」。阈值条改为黄段 0→预警、红段预警→告警（红段带 <code>left</code> 偏移，不再叠加覆盖）。</p>
+    <p><b>实测：</b>拖动滑块数值由 400 A 实时变为 210 A；点击保存出现反馈。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">登录态不持久化，刷新即登出</span></div>
+    <p class="who">src/store/useStore.ts</p>
+    <p class="done">接入 zustand <code>persist</code>，登录态写入 sessionStorage（<code>partialize</code> 只持久化 <code>user</code> 与 <code>isLoggedIn</code>，业务数据仍走内存 mock，避免本地缓存导致数据陈旧）。<code>ProtectedRoute</code> 的跳转加 <code>replace</code>。</p>
+    <p><b>实测：</b>登录后刷新页面仍停留在综合看板。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">看板告警数据与设备故障页不同源</span></div>
+    <p class="who">src/pages/Dashboard.tsx:2 / 45</p>
+    <p class="done">改为从 store 读取 <code>alarms</code>，与「设备故障」页共用同一份数据；原先那条写死的「75%」进度条已删除，替换为真实的设备名 + 告警类型。</p>
+    <p><b>实测：</b>在设备故障页处理一条告警后，看板「待处理告警」计数同步下降。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p1">P1</span><span class="t">价格管理 / 数据补录的 CRUD 是空壳</span></div>
+    <p class="who">src/pages/SystemPrice.tsx、src/pages/StatisticsSupplement.tsx</p>
+    <p class="done">两页数据均提升为 <code>useState</code>，实现完整新增 / 编辑 / 删除（删除带 <code>confirm</code>）。表单加入必填与数值校验（中文提示且不关闭弹窗）。顶部统计卡片改为按数据分组派生，不再手写常量。</p>
+    <p><b>实测：</b>新增价格方案后列表 8 → 9 行；必填为空时弹窗正确拦截。</p>
+  </div>
+</section>
+
+<!-- ========== P2 ========== -->
+<section>
+  <h2 class="sec">P2 · 一致性、逻辑与体验（15 类）</h2>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">路由重复指向同一页面</span></div>
+    <p class="who">src/routes.tsx、src/components/Sidebar.tsx</p>
+    <p class="done">删除 <code>/system/communication</code> 路由与侧边栏「通讯状态图」菜单项（原先与「网关通讯状态」渲染同一组件，且因严格相等判断导致两项不会同时高亮）。保留「仪表通讯状态 / 网关通讯状态」这对语义清晰的组合。</p>
+    <p><b>补充：</b>新增 <code>/404</code> 兜底路由与「页面走丢了」页面，原先访问未知路径是白屏。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">看板统计卡片 4 个 group-hover 特效失效</span></div>
+    <p class="who">src/pages/Dashboard.tsx:310</p>
+    <p class="done">父级补上缺失的 <code>group</code> 类，图标缩放 / 上浮 / 阴影增强恢复生效。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">暗色模式是死代码</span></div>
+    <p class="who">src/hooks/useTheme.ts、src/components/Layout.tsx</p>
+    <p class="done">在右上角控制区接入太阳 / 月亮切换按钮（含 <code>aria-label</code>），暗色能力真正可达。同时修掉 <code>localStorage.getItem('theme') as Theme</code> 的不安全断言，改为类型守卫校验。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">大面积「假交互」：按钮无响应、下拉不过滤</span></div>
+    <p class="who">涉及 13 个页面</p>
+    <p class="done"><b>按钮类</b>（12 处全部补齐）：离线事件「刷新」现会更新最后刷新时间；短信日志「筛选」改为真正参与过滤的状态按钮组、「配置接收人」弹出可增删号码的弹窗；报警分级「编辑配置」实现等级名称/配色/时限编辑；仪表与网关状态「刷新状态」重置最后同步为相对时间；集抄报表「导出报表」实现 CSV 下载；看板「查看全部」跳转告警页；价格管理删除按钮接入确认流程。</p>
+    <p class="done"><b>下拉 / 日期类</b>（7 个页面全部生效）：报警分析（周/月/季/年）、损耗分析、环比分析、最大需量、同比分析、集抄报表的月份，以及分时段报表的日期，均已作为种子参与数据派生，切换后数值必然变化。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">硬编码统计数字与明细对不上</span></div>
+    <p class="who">涉及 8 个页面</p>
+    <ul class="plain">
+      <li class="done">离线事件：数据补齐为 12 条，「本月离线次数」由数组长度派生，与表格完全一致；原因分析柱宽改为 <code>次数 / 最大次数</code> 的真实比例</li>
+      <li class="done">集抄报表：明细由 4 台设备派生（原先 12 行设备名全是「主配电柜」），切换月份数据联动</li>
+      <li class="done">分类能耗：单位能耗与同比改用数据字段（原先所有分类都写死 125 kWh/吨纸 与 -3.2%）</li>
+      <li class="done">数据补录：三张统计卡由记录数组派生，并新增「审核」按钮使数字可被验证</li>
+      <li class="done">最大需量：平均需量改为采样序列求平均（原手写 608，实为 ≈609.3）</li>
+      <li class="done">能源流向图：改用与分类能耗页同一数据源（原先两页对配电室、办公楼的数值互相矛盾）</li>
+      <li class="done">报警分析：类型分布百分比由条数派生，修正「其他」10 条却标 4% 的错误</li>
+      <li class="done">分时段报表：占比由电量算出并对四舍五入做兜底，保证合计 100%</li>
+    </ul>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">阈值大小颠倒、单位量纲错误、符号相反</span></div>
+    <p class="who">涉及 6 个页面</p>
+    <ul class="plain">
+      <li class="done">用能预警：电压阈值修正为 <code>min 10 &lt; warning 10.6 &lt; critical 10.9 ≤ max 11</code></li>
+      <li class="done">损耗分析：去掉错误的 <code>/ 1000</code>，量纲统一为 kWh；月度目标改由分项目标相加派生（原 7.5 与分项合计 9.8 矛盾）</li>
+      <li class="done">力调电费：抽出唯一判定函数，让状态色、调整比例、调整电费三者严格同源。原「0.92 显示 -0.75% 却配 +¥500」等符号矛盾全部消除，累计调整电费与逐月相加一致</li>
+      <li class="done">综合水费：合计补回漏掉的水资源费，单价 4.50 + 1.20 + 0.80 = 6.50 元/吨，且满足「合计 = 用量 × 综合单价」</li>
+      <li class="done">配电监测：负载率改用每台设备自己的额定电流（原先所有设备硬编码 500 A，出线 250 A 被严重低估）</li>
+      <li class="done">价格管理：删除 <code>typeof priceData[0]</code> 这种在声明前引用的脆弱写法，改为显式接口</li>
+    </ul>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">涨跌配色与语义不符</span></div>
+    <p class="who">src/pages/AlarmAnalysis.tsx 等</p>
+    <p class="done">颜色与 <code>up/down</code> 解耦，改由显式的「是否改善」判断决定：响应时间下降 → 绿色、重复告警率上升 → 红色。能耗与金额类指标遵循国内习惯（增 = 红、减 = 绿），并在代码注释中写明判断依据。看板统计卡片同步改为红涨绿跌。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">列表过滤为空时全空白</span></div>
+    <p class="who">涉及 10 个页面</p>
+    <p class="done">重写 <code>src/components/Empty.tsx</code>（原先只渲染一个「Empty」字样、且全项目零引用），支持 <code>title / description / action</code>，并在所有表格的 <code>tbody</code> 为空时以 <code>colSpan</code> 跨满整行渲染。设备管理页的空状态还内嵌了「新增设备」入口。</p>
+    <p><b>实测：</b>搜索不存在的设备时正确显示「没有找到匹配的设备」。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">图表数据源设计缺陷</span></div>
+    <p class="who">src/data/mockData.ts</p>
+    <p class="done">删除模块级的 <code>powerChartData</code> / <code>waterChartData</code> 随机常量，改为函数式数据层；<code>generateTimeLabels</code> 原先输出 24 个小时标签会跨天重复（出现两次 <code>11:00</code>），现固定输出 00:00–23:00，不再重复。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">移动端首屏被侧边栏遮罩挡住</span></div>
+    <p class="who">src/components/Layout.tsx、src/components/Sidebar.tsx</p>
+    <p class="done">移动端抽屉改为默认收起；遮罩层级从 <code>z-40</code> 降到 <code>z-30</code>（原先高于侧边栏导致「点遮罩关不掉」）；切到桌面尺寸时自动清理抽屉状态。</p>
+    <p><b>附带修复：</b>侧边栏「收起/展开」状态原先由组件内部持有，与外部 <code>lg:ml-64</code> 的外边距不同步（收起后仍留 256px 空白）。现统一提升到 Layout 受控，宽度与边距严格联动。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">侧边栏「退出登录」不贴底</span></div>
+    <p class="who">src/components/Sidebar.tsx:166 / 263</p>
+    <p class="done"><code>&lt;nav&gt;</code> 补上 <code>flex flex-col</code>，<code>mt-auto</code> 生效，退出按钮沉到侧边栏底部。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">数组下标取值无越界保护</span></div>
+    <p class="who">src/pages/Transformer.tsx:9</p>
+    <p class="done">改为 <code>transformerData[selectedTransformer] ?? transformerData[0]</code>，数据为空时渲染空状态而非崩溃。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">打包 1.27 MB 单文件、无代码分割</span></div>
+    <p class="who">src/routes.tsx、src/components/Layout.tsx</p>
+    <p class="done">31 个页面全部改为 <code>React.lazy</code> 路由级懒加载，在 Layout 的 <code>&lt;Outlet /&gt;</code> 外统一提供 <code>&lt;Suspense&gt;</code> 与加载态组件。产物由 1 个 1,272 KB 文件拆成 <b>49 个 chunk</b>，首屏 gzip 由 223 KB 降至 <b>88 KB</b>，Vite 的 chunk 体积告警消失。</p>
+    <p style="color:#9ca3af;font-size:13px;">注：曾尝试手工 <code>manualChunks</code> 拆分，实测反而把 chart.js 提前并入首屏预加载（登录页也要等它），故回退，采用 Vite 自动分包。</p>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag p2">P2</span><span class="t">类型与工程配置的若干小问题</span></div>
+    <ul class="plain">
+      <li class="done">删除全项目零引用的 <code>ChartData</code> 接口</li>
+      <li class="done"><code>Alarm.resolved_at</code> 改为可选属性，并新增 <code>AlarmLevel</code> / <code>AlarmStatus</code> 字面量类型；设备故障页对缺失值渲染「—」，时间统一格式化为 <code>YYYY-MM-DD HH:mm</code>（不再出现空文案或 <code>Invalid Date</code>）</li>
+      <li class="done">页面标题由脚手架默认的 <code>My Trae Project</code> 改为「EMS 智慧能源管理系统」</li>
+      <li class="done"><code>ProtectedRoute</code> 拆分为独立文件，消除 react-refresh 的 only-export-components 警告</li>
+      <li class="done"><code>tsconfig.json</code> 开启 <code>strict</code>、<code>noUnusedLocals</code>、<code>noUnusedParameters</code>、<code>noFallthroughCasesInSwitch</code>，并确认零新增报错</li>
+    </ul>
+  </div>
+
+  <div class="fix">
+    <div class="fix-head"><span class="tag opt">额外</span><span class="t">修复过程中新发现并处理的两个问题</span></div>
+    <ul class="plain">
+      <li class="done"><b>近 7 日能耗对比图</b>：用电量（110–125 MWh）与用水量（8100–8500 吨）量级差约 70 倍却共用同一 Y 轴，用电量柱几乎被压成一条线。已改为双 Y 轴（左轴用电量、右轴用水量），两根柱都清晰可读</li>
+      <li class="done"><b>平板上标题横幅被右上角浮动按钮遮挡</b>：给看板标题行加了响应式右侧留白</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== 遗留 ========== -->
+<section>
+  <h2 class="sec">遗留与说明</h2>
+  <table>
+    <thead><tr><th style="width:220px">事项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>「通讯状态图」菜单已移除</td><td>该入口原先与「网关通讯状态」指向同一页面。本次按「消除重复」处理，直接删除了重复入口。<b>如果这一项原本是想要一张独立的通讯拓扑图</b>，告诉我，我可以补一个真正的链路拓扑页（网关 → 仪表，含在线/离线状态）。</td></tr>
+      <tr><td>部分历史/常量展示未联动</td><td>最大需量页的历史数据与尖峰时段表、报警分级页的分级策略说明文案、离线事件的「当前在线率」属于静态说明性内容，本次未改为动态派生。</td></tr>
+      <tr><td>圆环占比的取整取舍</td><td>为保证占比合计严格等于 100%，最后一项采用「100 减去前面各项」的方式兜底，可能与该项真实值有 ±1% 的目视差异（如综合水费页水资源费显示 13%，真实 12.31%）。</td></tr>
+      <tr><td>数据仍为前端 mock</td><td>本次只修逻辑与交互，未接入后端。所有 CRUD 的改动在刷新后重置（仅登录态持久化）。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  验证方式：<code>tsc -b</code>（含 strict / noUnusedLocals / noUnusedParameters，0 错误）、<code>eslint .</code>（0 问题）、<code>vite build</code>（成功，49 chunk，首屏 88 KB gzip）、Headless Chrome + CDP 实测 30 条路由渲染与 11 项交互流程（全通过，零控制台错误）。共改动 39 个文件、新增 3 个文件。
+</footer>
+
+</div>
+</body>
+</html>

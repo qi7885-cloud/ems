@@ -1,39 +1,99 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, DollarSign, Zap, Droplets, Thermometer } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import type { MetricItem } from '../components/MetricStrip';
+import Empty from '../components/Empty';
+
+interface PricePlan {
+  id: number;
+  type: 'electricity' | 'water' | 'gas' | 'sewage';
+  name: string;
+  unit: string;
+  price: number;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
+interface PriceForm {
+  type: string;
+  name: string;
+  unit: string;
+  price: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
+const INITIAL_PRICE_PLANS: PricePlan[] = [
+  { id: 1, type: 'electricity', name: '尖峰电价', unit: '元/kWh', price: 1.25, startDate: '2024-01-01', endDate: '2024-12-31', description: '08:00-11:00, 17:00-21:00' },
+  { id: 2, type: 'electricity', name: '高峰电价', unit: '元/kWh', price: 0.98, startDate: '2024-01-01', endDate: '2024-12-31', description: '07:00-08:00, 11:00-17:00, 21:00-22:00' },
+  { id: 3, type: 'electricity', name: '平段电价', unit: '元/kWh', price: 0.65, startDate: '2024-01-01', endDate: '2024-12-31', description: '06:00-07:00, 22:00-23:00' },
+  { id: 4, type: 'electricity', name: '低谷电价', unit: '元/kWh', price: 0.35, startDate: '2024-01-01', endDate: '2024-12-31', description: '23:00-06:00' },
+  { id: 5, type: 'water', name: '工业用水', unit: '元/吨', price: 4.5, startDate: '2024-01-01', endDate: '2024-12-31', description: '生产用水' },
+  { id: 6, type: 'water', name: '生活用水', unit: '元/吨', price: 3.2, startDate: '2024-01-01', endDate: '2024-12-31', description: '办公区生活用水' },
+  { id: 7, type: 'gas', name: '天然气', unit: '元/m³', price: 3.8, startDate: '2024-01-01', endDate: '2024-12-31', description: '锅炉及食堂用气' },
+  { id: 8, type: 'sewage', name: '排污费', unit: '元/吨', price: 1.2, startDate: '2024-01-01', endDate: '2024-12-31', description: '污水处理费' },
+];
+
+const createEmptyForm = (): PriceForm => ({
+  type: 'electricity',
+  name: '',
+  unit: '元/kWh',
+  price: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+});
+
+const typeConfig: Record<PricePlan['type'], { icon: typeof Zap; label: string; tag: string }> = {
+  electricity: { icon: Zap, label: '电力', tag: 'tag-warn' },
+  water: { icon: Droplets, label: '水', tag: 'tag-accent' },
+  gas: { icon: Thermometer, label: '燃气', tag: 'tag-info' },
+  sewage: { icon: DollarSign, label: '排污', tag: 'tag-ok' },
+};
+
+const typeTone: Record<PricePlan['type'], MetricItem['tone']> = {
+  electricity: 'warn',
+  water: 'accent',
+  gas: 'default',
+  sewage: 'ok',
+};
 
 export default function SystemPrice() {
+  const [priceData, setPriceData] = useState<PricePlan[]>(INITIAL_PRICE_PLANS);
   const [showModal, setShowModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<typeof priceData[0] | null>(null);
+  const [editingItem, setEditingItem] = useState<PricePlan | null>(null);
+  const [formData, setFormData] = useState<PriceForm>(createEmptyForm);
+  const [formError, setFormError] = useState('');
 
-  const [formData, setFormData] = useState({
-    type: 'electricity',
-    name: '',
-    unit: '元/kWh',
-    price: '',
-    startDate: '',
-    endDate: '',
-    description: '',
-  });
+  const { counts, total } = useMemo(
+    () =>
+      priceData.reduce(
+        (acc, plan) => {
+          acc.counts[plan.type] += 1;
+          acc.total += 1;
+          return acc;
+        },
+        {
+          counts: { electricity: 0, water: 0, gas: 0, sewage: 0 } as Record<PricePlan['type'], number>,
+          total: 0,
+        },
+      ),
+    [priceData],
+  );
 
-  const priceData = [
-    { id: 1, type: 'electricity', name: '尖峰电价', unit: '元/kWh', price: 1.25, startDate: '2024-01-01', endDate: '2024-12-31', description: '08:00-11:00, 17:00-21:00' },
-    { id: 2, type: 'electricity', name: '高峰电价', unit: '元/kWh', price: 0.98, startDate: '2024-01-01', endDate: '2024-12-31', description: '07:00-08:00, 11:00-17:00, 21:00-22:00' },
-    { id: 3, type: 'electricity', name: '平段电价', unit: '元/kWh', price: 0.65, startDate: '2024-01-01', endDate: '2024-12-31', description: '06:00-07:00, 22:00-23:00' },
-    { id: 4, type: 'electricity', name: '低谷电价', unit: '元/kWh', price: 0.35, startDate: '2024-01-01', endDate: '2024-12-31', description: '23:00-06:00' },
-    { id: 5, type: 'water', name: '工业用水', unit: '元/吨', price: 4.5, startDate: '2024-01-01', endDate: '2024-12-31', description: '生产用水' },
-    { id: 6, type: 'water', name: '生活用水', unit: '元/吨', price: 3.2, startDate: '2024-01-01', endDate: '2024-12-31', description: '办公区生活用水' },
-    { id: 7, type: 'gas', name: '天然气', unit: '元/m³', price: 3.8, startDate: '2024-01-01', endDate: '2024-12-31', description: '锅炉及食堂用气' },
-    { id: 8, type: 'sewage', name: '排污费', unit: '元/吨', price: 1.2, startDate: '2024-01-01', endDate: '2024-12-31', description: '污水处理费' },
+  const stats: MetricItem[] = [
+    { label: '电力方案', value: counts.electricity, unit: '项', icon: Zap, tone: typeTone.electricity },
+    { label: '水价方案', value: counts.water, unit: '项', icon: Droplets, tone: typeTone.water },
+    { label: '燃气方案', value: counts.gas, unit: '项', icon: Thermometer, tone: typeTone.gas },
+    { label: '排污方案', value: counts.sewage, unit: '项', icon: DollarSign, tone: typeTone.sewage },
   ];
 
-  const typeConfig = {
-    electricity: { icon: Zap, color: 'text-yellow-600', bg: 'bg-yellow-100', label: '电力' },
-    water: { icon: Droplets, color: 'text-blue-600', bg: 'bg-blue-100', label: '水' },
-    gas: { icon: Thermometer, color: 'text-orange-600', bg: 'bg-orange-100', label: '燃气' },
-    sewage: { icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100', label: '排污' },
-  };
-
-  const handleOpenModal = (item?: typeof priceData[0]) => {
+  const handleOpenModal = (item?: PricePlan) => {
+    setFormError('');
     if (item) {
       setEditingItem(item);
       setFormData({
@@ -47,144 +107,151 @@ export default function SystemPrice() {
       });
     } else {
       setEditingItem(null);
-      setFormData({
-        type: 'electricity',
-        name: '',
-        unit: '元/kWh',
-        price: '',
-        startDate: '',
-        endDate: '',
-        description: '',
-      });
+      setFormData(createEmptyForm());
     }
     setShowModal(true);
   };
 
-  const handleSubmit = () => {
+  const handleCloseModal = () => {
     setShowModal(false);
     setEditingItem(null);
+    setFormError('');
   };
 
-  const stats = [
-    { label: '电价方案', value: '4', icon: Zap, color: 'bg-yellow-100 text-yellow-600' },
-    { label: '水价方案', value: '2', icon: Droplets, color: 'bg-blue-100 text-blue-600' },
-    { label: '气价方案', value: '1', icon: Thermometer, color: 'bg-orange-100 text-orange-600' },
-    { label: '排污方案', value: '1', icon: DollarSign, color: 'bg-green-100 text-green-600' },
-  ];
+  const handleSubmit = () => {
+    const name = formData.name.trim();
+    const price = Number(formData.price);
+
+    if (!name) {
+      setFormError('请输入方案名称');
+      return;
+    }
+    if (!formData.price.trim() || Number.isNaN(price) || price <= 0) {
+      setFormError('单价必须为正数');
+      return;
+    }
+
+    const plan: PricePlan = {
+      id: editingItem ? editingItem.id : Date.now(),
+      type: formData.type as PricePlan['type'],
+      name,
+      unit: formData.unit,
+      price,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      description: formData.description,
+    };
+
+    setPriceData((prev) =>
+      editingItem ? prev.map((item) => (item.id === editingItem.id ? plan : item)) : [plan, ...prev],
+    );
+    handleCloseModal();
+  };
+
+  const handleDelete = (item: PricePlan) => {
+    if (window.confirm(`确定删除价格方案「${item.name}」吗？`)) {
+      setPriceData((prev) => prev.filter((plan) => plan.id !== item.id));
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">用能价格管理</h1>
-          <p className="text-gray-500 mt-1">管理各类能源价格方案</p>
-        </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          添加价格方案
+    <div className="space-y-3">
+      <PageHeader title="用能价格管理" description="管理各类能源价格方案">
+        <button onClick={() => handleOpenModal()} className="btn-primary">
+          <Plus className="h-4 w-4" />
+          新增方案
         </button>
-      </div>
+      </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}>
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <MetricStrip cols={4} items={stats} />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">价格方案列表</h2>
-        </div>
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">类型</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">方案名称</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">单价</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">有效期</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">说明</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">操作</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {priceData.map((item) => {
-              const config = typeConfig[item.type as keyof typeof typeConfig];
-              const TypeIcon = config.icon;
-              return (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.color}`}>
-                      <TypeIcon className="w-3 h-3" />
-                      {config.label}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
-                  <td className="px-6 py-4">
-                    <span className="text-blue-600 font-semibold">{item.price} {item.unit}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{item.startDate} ~ {item.endDate}</td>
-                  <td className="px-6 py-4 text-gray-600 text-sm max-w-xs truncate">{item.description}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleOpenModal(item)}
-                        className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="编辑"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="删除"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <Panel
+        title="价格方案列表"
+        aside={<span className="font-mono">共 {total} 条</span>}
+        flush
+      >
+        {priceData.length === 0 ? (
+          <Empty title="暂无价格方案" description="点击右上角「新增方案」新增一条" />
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>类型</th>
+                <th>方案名称</th>
+                <th className="text-right">单价</th>
+                <th>有效期</th>
+                <th>说明</th>
+                <th className="text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {priceData.map((item) => {
+                const config = typeConfig[item.type];
+                const TypeIcon = config.icon;
+                return (
+                  <tr key={item.id}>
+                    <td>
+                      <span className={config.tag}>
+                        <TypeIcon className="h-3 w-3" />
+                        {config.label}
+                      </span>
+                    </td>
+                    <td className="font-medium text-ink">{item.name}</td>
+                    <td className="text-right">
+                      <span className="font-mono text-accent">{item.price}</span>
+                      <span className="ml-1 text-[11px] text-ink-3">{item.unit}</span>
+                    </td>
+                    <td className="font-mono text-ink-2">
+                      {item.startDate} ~ {item.endDate}
+                    </td>
+                    <td className="max-w-xs truncate text-ink-3">{item.description}</td>
+                    <td>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleOpenModal(item)}
+                          className="btn-ghost h-7 w-7 !px-0"
+                          title="编辑"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          className="btn-ghost h-7 w-7 !px-0 text-danger"
+                          title="删除"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </Panel>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {editingItem ? '编辑价格方案' : '添加价格方案'}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingItem(null);
-                }}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="mx-4 w-full max-w-lg rounded border border-line bg-panel">
+            <div className="panel-head">
+              <h2 className="panel-title">{editingItem ? '编辑价格方案' : '新增价格方案'}</h2>
+              <button onClick={handleCloseModal} className="btn-ghost h-7 w-7 !px-0" title="关闭">
+                <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="space-y-3 p-4">
+              {formError && (
+                <div className="rounded-sm border border-danger/40 bg-danger/10 px-3 py-2 text-[12px] text-danger">
+                  {formError}
+                </div>
+              )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">能源类型</label>
+                <label className="label">能源类型</label>
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field h-8 w-full"
                 >
                   <option value="electricity">电力</option>
                   <option value="water">水</option>
@@ -193,84 +260,75 @@ export default function SystemPrice() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">方案名称</label>
+                <label className="label">方案名称</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field h-8 w-full"
                   placeholder="输入方案名称"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">单价</label>
+                  <label className="label">单价</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field h-8 w-full"
                     placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">单位</label>
+                  <label className="label">单位</label>
                   <input
                     type="text"
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field h-8 w-full"
                     placeholder="元/单位"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">生效日期</label>
+                  <label className="label">生效日期</label>
                   <input
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field h-8 w-full"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">结束日期</label>
+                  <label className="label">结束日期</label>
                   <input
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field h-8 w-full"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">说明</label>
+                <label className="label">说明</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field h-auto w-full resize-y"
                   rows={3}
                   placeholder="输入方案说明"
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingItem(null);
-                }}
-                className="px-4 py-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
+            <div className="flex items-center justify-end gap-2 border-t border-line px-4 py-2.5">
+              <button onClick={handleCloseModal} className="btn-secondary">
                 取消
               </button>
-              <button
-                onClick={handleSubmit}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                <Save className="w-4 h-4" />
+              <button onClick={handleSubmit} className="btn-primary">
+                <Save className="h-4 w-4" />
                 保存
               </button>
             </div>

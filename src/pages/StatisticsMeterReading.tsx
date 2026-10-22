@@ -1,132 +1,188 @@
-import { useState } from 'react';
-import { FileText, Download, Calendar, Filter } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Download, Activity, CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
+import { monthOptions, seededSeries, seededValue } from '../data/mockData';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import Empty from '../components/Empty';
+
+interface MeterDevice {
+  name: string;
+  unit: string;
+  min: number;
+  max: number;
+}
+
+/** 抄表设备清单：抄表明细、汇总指标均由该列表派生 */
+const devices: MeterDevice[] = [
+  { name: '主配电柜', unit: 'kWh', min: 110000, max: 135000 },
+  { name: '变压器A', unit: 'kWh', min: 60000, max: 75000 },
+  { name: '变压器B', unit: 'kWh', min: 50000, max: 65000 },
+  { name: '水表-1号', unit: '吨', min: 7000, max: 9000 },
+];
+
+const monthLabel = (month: string) => {
+  const [year, monthNumber] = month.split('-');
+  return `${year}年${Number(monthNumber)}月`;
+};
 
 export default function StatisticsMeterReading() {
   const [selectedMonth, setSelectedMonth] = useState('2024-06');
 
-  const meterData = [
-    { id: 1, equipment: '主配电柜', reading: 125000, unit: 'kWh', date: '2024-06-07' },
-    { id: 2, equipment: '变压器A', reading: 68000, unit: 'kWh', date: '2024-06-07' },
-    { id: 3, equipment: '变压器B', reading: 57000, unit: 'kWh', date: '2024-06-07' },
-    { id: 4, equipment: '水表-1号', reading: 8500, unit: '吨', date: '2024-06-07' },
-  ];
+  const rows = useMemo(() => {
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const lastDay = new Date(year, month, 0).getDate();
+    const date = `${selectedMonth}-${String(lastDay).padStart(2, '0')}`;
 
-  const dailyData = [
-    { date: '06-01', power: 110000, water: 8200 },
-    { date: '06-02', power: 115000, water: 8300 },
-    { date: '06-03', power: 120000, water: 8400 },
-    { date: '06-04', power: 118000, water: 8250 },
-    { date: '06-05', power: 122000, water: 8450 },
-    { date: '06-06', power: 123000, water: 8480 },
-    { date: '06-07', power: 125000, water: 8500 },
-  ];
+    return devices.map((device) => {
+      const reading = seededValue(`meter-${selectedMonth}-${device.name}`, device.min, device.max);
+      const abnormal = seededValue(`meter-status-${selectedMonth}-${device.name}`, 0, 99) < 15;
+      return {
+        equipment: device.name,
+        unit: device.unit,
+        reading,
+        date,
+        statusText: abnormal ? '异常' : '已抄录',
+        abnormal,
+      };
+    });
+  }, [selectedMonth]);
+
+  const metrics = useMemo(() => {
+    const total = rows.length;
+    const success = rows.filter((row) => !row.abnormal).length;
+    const abnormal = total - success;
+    const successRate = total > 0 ? Math.round((success / total) * 100) : 0;
+    return [
+      { label: '总抄表数', value: total, unit: '条', icon: Activity },
+      { label: '成功数', value: success, unit: '条', icon: CheckCircle, tone: 'ok' as const },
+      {
+        label: '成功率',
+        value: `${successRate}%`,
+        icon: TrendingUp,
+        tone: successRate >= 90 ? ('ok' as const) : ('warn' as const),
+      },
+      {
+        label: '异常数',
+        value: abnormal,
+        unit: '条',
+        icon: AlertTriangle,
+        tone: abnormal > 0 ? ('warn' as const) : ('ok' as const),
+      },
+    ];
+  }, [rows]);
+
+  const dailyTrend = useMemo(() => {
+    const power = seededSeries(`meter-power-${selectedMonth}`, 7, 105000, 130000);
+    const water = seededSeries(`meter-water-${selectedMonth}`, 7, 8000, 9000);
+    return power.map((value, index) => ({
+      date: `${selectedMonth.slice(5)}-${String(index + 1).padStart(2, '0')}`,
+      power: value,
+      water: water[index],
+    }));
+  }, [selectedMonth]);
+
+  const powerMax = Math.max(...dailyTrend.map((item) => item.power), 1);
+  const waterMax = Math.max(...dailyTrend.map((item) => item.water), 1);
+
+  const handleExport = () => {
+    const header = ['设备名称', '抄表日期', '数值', '单位', '状态'];
+    const body = rows.map((row) => [row.equipment, row.date, String(row.reading), row.unit, row.statusText]);
+    const csv = [header, ...body].map((cols) => cols.join(',')).join('\r\n');
+    // \uFEFF（BOM）保证 Excel 打开时中文不乱码
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `集抄报表-${selectedMonth}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">集抄报表</h1>
-          <p className="text-gray-500 mt-1">查看各仪表的抄表数据</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-gray-500" />
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="2024-06">2024年6月</option>
-              <option value="2024-05">2024年5月</option>
-              <option value="2024-04">2024年4月</option>
-            </select>
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-            <Download className="w-5 h-5" />
-            导出报表
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">今日抄表数据</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {meterData.map((item) => (
-            <div key={item.id} className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">{item.equipment}</p>
-              <div className="flex items-baseline gap-2 mt-2">
-                <span className="text-2xl font-bold text-gray-900">{item.reading.toLocaleString()}</span>
-                <span className="text-sm text-gray-600">{item.unit}</span>
-              </div>
-              <p className="text-xs text-gray-400 mt-1">{item.date}</p>
-            </div>
+    <div className="space-y-3">
+      <PageHeader title="集抄报表" description="查看各仪表的抄表数据">
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="field h-7"
+        >
+          {monthOptions.map((month) => (
+            <option key={month} value={month}>
+              {monthLabel(month)}
+            </option>
           ))}
-        </div>
-      </div>
+        </select>
+        <button type="button" onClick={handleExport} className="btn-secondary h-7">
+          <Download className="h-3.5 w-3.5" />
+          导出报表
+        </button>
+      </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">本月用电量趋势</h2>
-          <div className="h-64 flex items-end justify-between gap-2">
-            {dailyData.map((day, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
+      <MetricStrip cols={4} items={metrics} />
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <Panel title="本月用电量趋势" aside={<span className="font-mono text-[11px]">单位 kWh</span>}>
+          <div className="flex h-[200px] items-end justify-between gap-1.5">
+            {dailyTrend.map((day) => (
+              <div key={day.date} className="flex h-full flex-1 flex-col items-center justify-end">
                 <div
-                  className="w-full bg-blue-500 rounded-t"
-                  style={{ height: `${(day.power / 130000) * 240}px` }}
+                  className="w-full rounded-t bg-accent"
+                  style={{ height: `${(day.power / powerMax) * 180}px` }}
+                  title={`${day.date} 用电量 ${day.power.toLocaleString('zh-CN')} kWh`}
                 />
-                <span className="text-xs text-gray-500 mt-2">{day.date}</span>
+                <span className="mt-2 font-mono text-[11px] text-ink-3">{day.date}</span>
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">本月用水量趋势</h2>
-          <div className="h-64 flex items-end justify-between gap-2">
-            {dailyData.map((day, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
+        <Panel title="本月用水量趋势" aside={<span className="font-mono text-[11px]">单位 吨</span>}>
+          <div className="flex h-[200px] items-end justify-between gap-1.5">
+            {dailyTrend.map((day) => (
+              <div key={day.date} className="flex h-full flex-1 flex-col items-center justify-end">
                 <div
-                  className="w-full bg-cyan-500 rounded-t"
-                  style={{ height: `${(day.water / 9000) * 240}px` }}
+                  className="w-full rounded-t bg-info"
+                  style={{ height: `${(day.water / waterMax) * 180}px` }}
+                  title={`${day.date} 用水量 ${day.water.toLocaleString('zh-CN')} 吨`}
                 />
-                <span className="text-xs text-gray-500 mt-2">{day.date}</span>
+                <span className="mt-2 font-mono text-[11px] text-ink-3">{day.date}</span>
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">抄表明细</h2>
-        </div>
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">设备名称</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">抄表日期</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">数值</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">单位</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">状态</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {[...Array(12)].map((_, i) => (
-              <tr key={i} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">主配电柜</td>
-                <td className="px-6 py-4 text-gray-600">2024-06-{String(i + 1).padStart(2, '0')}</td>
-                <td className="px-6 py-4 text-gray-600">{(110000 + i * 1500).toLocaleString()}</td>
-                <td className="px-6 py-4 text-gray-600">kWh</td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    已抄录
-                  </span>
-                </td>
+      <Panel title={`抄表明细（${monthLabel(selectedMonth)}）`} flush>
+        {rows.length === 0 ? (
+          <Empty title="暂无抄表数据" description="当前月份没有可展示的仪表抄表记录" />
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>设备名称</th>
+                <th>抄表日期</th>
+                <th className="text-right">数值</th>
+                <th>单位</th>
+                <th>状态</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.equipment}>
+                  <td className="font-medium text-ink">{row.equipment}</td>
+                  <td className="font-mono text-ink-2">{row.date}</td>
+                  <td className="text-right font-mono text-ink">{row.reading.toLocaleString('zh-CN')}</td>
+                  <td className="text-ink-2">{row.unit}</td>
+                  <td>
+                    <span className={row.abnormal ? 'tag-warn' : 'tag-ok'}>{row.statusText}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Panel>
     </div>
   );
 }

@@ -1,214 +1,249 @@
-import { useState } from 'react';
-import { Gauge, AlertTriangle, TrendingUp, Calendar, Zap } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Gauge, Zap } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import { monthOptions, seededValue } from '../data/mockData';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import { useChartTheme, axisStyle, tooltipStyle, legendStyle } from '../hooks/useChartTheme';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+
+const DEMAND_TARGET = 650;
+// 需量罚款按超出目标的部分计收（元/kW）
+const PENALTY_RATE = 200;
+const SAMPLE_DAYS = ['01', '05', '10', '15', '20', '25', '30'];
 
 export default function AnalysisMaxDemand() {
   const [selectedMonth, setSelectedMonth] = useState('2024-06');
+  const ct = useChartTheme();
 
-  const demandData = [
-    { date: '06-01', demand: 580, peak: 620, offpeak: 450 },
-    { date: '06-05', demand: 610, peak: 650, offpeak: 480 },
-    { date: '06-10', demand: 595, peak: 630, offpeak: 465 },
-    { date: '06-15', demand: 625, peak: 670, offpeak: 500 },
-    { date: '06-20', demand: 605, peak: 645, offpeak: 475 },
-    { date: '06-25', demand: 635, peak: 680, offpeak: 510 },
-    { date: '06-30', demand: 615, peak: 655, offpeak: 490 },
-  ];
+  // 采样点随所选月份派生；高峰 > 平均 > 低谷，保证量纲关系恒成立
+  const demandData = useMemo(
+    () =>
+      SAMPLE_DAYS.map((day) => {
+        const demand = seededValue(`demand-${selectedMonth}-${day}`, 560, 640, 0);
+        const peak = seededValue(`demand-peak-${selectedMonth}-${day}`, demand + 20, demand + 70, 0);
+        const offpeak = seededValue(`demand-offpeak-${selectedMonth}-${day}`, demand - 160, demand - 100, 0);
+        return { date: `${selectedMonth.slice(5)}-${day}`, demand, peak, offpeak };
+      }),
+    [selectedMonth],
+  );
 
-  const monthlyStats = {
-    maxDemand: 680,
-    avgDemand: 608,
-    peakHours: 186,
-    penaltyFee: 12500,
-    target: 650,
-  };
+  // 最大需量取各采样点的高峰值；平均需量 = 采样序列均值（sum / length）
+  // 由于每个采样点 peak > demand ≥ 均值，所以「最大需量 ≥ 平均需量」恒成立
+  const monthlyStats = useMemo(() => {
+    const sum = demandData.reduce((acc, item) => acc + item.demand, 0);
+    const avgDemand = Number((sum / demandData.length).toFixed(1));
+    const maxDemand = Math.max(...demandData.map((item) => item.peak));
+    return {
+      maxDemand,
+      avgDemand,
+      peakHours: 186,
+      target: DEMAND_TARGET,
+      penaltyFee: maxDemand > DEMAND_TARGET ? (maxDemand - DEMAND_TARGET) * PENALTY_RATE : 0,
+    };
+  }, [demandData]);
 
-  const penaltyRate = ((monthlyStats.maxDemand - monthlyStats.target) / monthlyStats.target * 100).toFixed(1);
+  // 需量率 = 实际最大需量 / 合同需量 × 100%，>100% 视为超限
+  const demandRate = ((monthlyStats.maxDemand / monthlyStats.target) * 100).toFixed(1);
+  const overCount = demandData.filter((item) => item.peak > DEMAND_TARGET).length;
 
   const historyData = [
-    { month: '1月', maxDemand: 640, target: 650 },
-    { month: '2月', maxDemand: 620, target: 650 },
-    { month: '3月', maxDemand: 655, target: 650 },
-    { month: '4月', maxDemand: 668, target: 650 },
-    { month: '5月', maxDemand: 672, target: 650 },
-    { month: '6月', maxDemand: 680, target: 650 },
+    { month: '1月', maxDemand: 640, target: DEMAND_TARGET },
+    { month: '2月', maxDemand: 620, target: DEMAND_TARGET },
+    { month: '3月', maxDemand: 655, target: DEMAND_TARGET },
+    { month: '4月', maxDemand: 668, target: DEMAND_TARGET },
+    { month: '5月', maxDemand: 672, target: DEMAND_TARGET },
+    { month: '6月', maxDemand: 680, target: DEMAND_TARGET },
   ];
 
+  const axis = axisStyle(ct);
+
+  const demandChartData = {
+    labels: demandData.map((item) => item.date),
+    datasets: [
+      {
+        label: '高峰需量',
+        data: demandData.map((item) => item.peak),
+        borderColor: ct.danger,
+        backgroundColor: ct.danger,
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+      },
+      {
+        label: '平均需量',
+        data: demandData.map((item) => item.demand),
+        borderColor: ct.accent,
+        backgroundColor: ct.accent,
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+      },
+      {
+        label: '低谷需量',
+        data: demandData.map((item) => item.offpeak),
+        borderColor: ct.ok,
+        backgroundColor: ct.ok,
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+      },
+      {
+        // 合同需量参考线：恒定值 + 虚线，直观看出超限位置
+        label: '合同需量',
+        data: demandData.map(() => DEMAND_TARGET),
+        borderColor: ct.danger,
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        tension: 0,
+        fill: false,
+      },
+    ],
+  };
+
+  const demandChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index' as const, intersect: false },
+    plugins: { legend: legendStyle(ct, 'top'), tooltip: tooltipStyle(ct) },
+    scales: {
+      x: { ...axis, grid: { display: false }, ticks: { ...axis.ticks, maxRotation: 0, autoSkipPadding: 10 } },
+      y: { ...axis, title: { display: true, text: 'kW', color: ct.tick, font: { size: 11 } } },
+    },
+    elements: { point: { hoverBorderWidth: 2 } },
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">最大需量分析</h1>
-          <p className="text-gray-500 mt-1">分析最大需量变化趋势与费用影响</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-gray-500" />
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="2024-06">2024年6月</option>
-            <option value="2024-05">2024年5月</option>
-            <option value="2024-04">2024年4月</option>
-            <option value="2024-03">2024年3月</option>
-          </select>
-        </div>
-      </div>
+    <div className="space-y-3">
+      <PageHeader title="最大需量分析" description="分析最大需量变化趋势与费用影响">
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="field h-7"
+          aria-label="选择月份"
+        >
+          {monthOptions.map((month) => (
+            <option key={month} value={month}>
+              {month.replace('-', '年')}月
+            </option>
+          ))}
+        </select>
+      </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-              <Gauge className="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">本月最大需量</p>
-              <p className="text-2xl font-bold text-gray-900">{monthlyStats.maxDemand} <span className="text-sm font-normal text-gray-500">kW</span></p>
-            </div>
-          </div>
-          {monthlyStats.maxDemand > monthlyStats.target && (
-            <div className="mt-3 flex items-center gap-1 text-red-600 text-sm">
-              <AlertTriangle className="w-4 h-4" />
-              <span>超目标 {penaltyRate}%</span>
-            </div>
-          )}
-        </div>
+      <MetricStrip
+        cols={4}
+        items={[
+          {
+            label: '最大需量',
+            value: monthlyStats.maxDemand,
+            unit: 'kW',
+            icon: Gauge,
+            tone: monthlyStats.maxDemand > monthlyStats.target ? 'danger' : 'accent',
+            note: `合同需量 ${monthlyStats.target} kW`,
+          },
+          { label: '平均需量', value: monthlyStats.avgDemand, unit: 'kW', icon: Zap, note: '采样序列均值' },
+          {
+            label: '需量率',
+            value: demandRate,
+            unit: '%',
+            // 超过合同需量为恶化（danger 红），否则正常（ok 绿）
+            tone: monthlyStats.maxDemand > monthlyStats.target ? 'danger' : 'ok',
+            note: '实际 / 合同',
+          },
+          {
+            label: '超限次数',
+            value: overCount,
+            unit: '次',
+            tone: overCount > 0 ? 'warn' : 'ok',
+            note:
+              monthlyStats.penaltyFee > 0
+                ? `罚款 ¥${monthlyStats.penaltyFee.toLocaleString()}`
+                : '本月未超限',
+          },
+        ]}
+      />
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">平均需量</p>
-              <p className="text-2xl font-bold text-gray-900">{monthlyStats.avgDemand} <span className="text-sm font-normal text-gray-500">kW</span></p>
-            </div>
-          </div>
+      <Panel title="需量采样曲线" aside={<span className="font-mono text-[11px]">单位 kW · 虚线为合同需量</span>}>
+        <div className="h-[260px]">
+          <Line data={demandChartData} options={demandChartOptions} />
         </div>
+      </Panel>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <Zap className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">高峰时段</p>
-              <p className="text-2xl font-bold text-gray-900">{monthlyStats.peakHours} <span className="text-sm font-normal text-gray-500">小时</span></p>
-            </div>
-          </div>
+      <Panel title="历史最大需量对比" aside={<span className="font-mono text-[11px]">合同需量 {DEMAND_TARGET} kW</span>} flush>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>月份</th>
+                <th className="text-right">最大需量 (kW)</th>
+                <th className="text-right">合同需量 (kW)</th>
+                <th className="text-right">差额 (kW)</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historyData.map((item) => {
+                const over = item.maxDemand > item.target;
+                return (
+                  <tr key={item.month}>
+                    <td className="text-ink">{item.month}</td>
+                    <td className={`text-right font-mono ${over ? 'text-danger' : 'text-ink'}`}>
+                      {item.maxDemand}
+                    </td>
+                    <td className="text-right font-mono text-ink-2">{item.target}</td>
+                    <td className={`text-right font-mono ${over ? 'text-danger' : 'text-ok'}`}>
+                      {over ? '+' : ''}
+                      {item.maxDemand - item.target}
+                    </td>
+                    <td>
+                      <span className={over ? 'tag-danger' : 'tag-ok'}>{over ? '超限' : '达标'}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+      </Panel>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">需量罚款</p>
-              <p className="text-2xl font-bold text-red-600">¥{monthlyStats.penaltyFee.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">本月需量变化</h2>
-          <div className="h-64 flex items-end justify-between gap-4">
-            {demandData.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
-                <div className="w-full flex gap-1">
-                  <div
-                    className="flex-1 bg-red-500 rounded-t"
-                    style={{ height: `${(item.peak / 700) * 180}px` }}
-                  />
-                  <div
-                    className="flex-1 bg-blue-500 rounded-t"
-                    style={{ height: `${(item.demand / 700) * 180}px` }}
-                  />
-                  <div
-                    className="flex-1 bg-green-500 rounded-t"
-                    style={{ height: `${(item.offpeak / 700) * 180}px` }}
-                  />
-                </div>
-                <span className="text-xs text-gray-500 mt-2">{item.date}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-center gap-6 mt-4">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-red-500 rounded" />
-              <span className="text-xs text-gray-600">高峰</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-blue-500 rounded" />
-              <span className="text-xs text-gray-600">平均</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-green-500 rounded" />
-              <span className="text-xs text-gray-600">低谷</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">历史最大需量对比</h2>
-          <div className="h-64 flex items-end justify-between gap-4">
-            {historyData.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
-                <div className="w-full flex gap-1">
-                  <div
-                    className={`flex-1 rounded-t ${item.maxDemand > item.target ? 'bg-red-500' : 'bg-blue-500'}`}
-                    style={{ height: `${(item.maxDemand / 700) * 180}px` }}
-                  />
-                  <div
-                    className="flex-1 bg-gray-300 rounded-t border-t-2 border-dashed border-gray-400"
-                    style={{ height: `${(item.target / 700) * 180}px` }}
-                  />
-                </div>
-                {item.maxDemand > item.target && (
-                  <span className="mt-1 px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full">超目标</span>
-                )}
-                <span className="text-xs text-gray-500 mt-1">{item.month}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-center gap-6 mt-4">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-blue-500 rounded" />
-              <span className="text-xs text-gray-600">实际需量</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-gray-300 rounded border-t-2 border-dashed border-gray-400" />
-              <span className="text-xs text-gray-600">目标值</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">需量控制建议</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-orange-50 rounded-lg">
-            <h3 className="font-semibold text-orange-800 mb-2">削峰建议</h3>
-            <p className="text-sm text-orange-700">
+      <Panel title="需量控制建议">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded border border-warn/40 bg-warn/10 p-3">
+            <h3 className="text-[13px] font-semibold text-warn">削峰建议</h3>
+            <p className="mt-1 text-[12px] text-ink-2">
               在尖峰时段(08:00-11:00, 17:00-21:00)合理安排大型设备错峰运行。
             </p>
           </div>
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">负荷转移</h3>
-            <p className="text-sm text-blue-700">
-              将部分生产任务转移至平段和低谷时段，降低高峰负荷。
-            </p>
+          <div className="rounded border border-accent/40 bg-accent/10 p-3">
+            <h3 className="text-[13px] font-semibold text-accent">负荷转移</h3>
+            <p className="mt-1 text-[12px] text-ink-2">将部分生产任务转移至平段和低谷时段，降低高峰负荷。</p>
           </div>
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-800 mb-2">节能改造</h3>
-            <p className="text-sm text-green-700">
-              对高耗能设备进行节能改造，降低单位产量能耗。
-            </p>
+          <div className="rounded border border-ok/40 bg-ok/10 p-3">
+            <h3 className="text-[13px] font-semibold text-ok">节能改造</h3>
+            <p className="mt-1 text-[12px] text-ink-2">对高耗能设备进行节能改造，降低单位产量能耗。</p>
           </div>
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

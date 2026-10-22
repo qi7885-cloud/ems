@@ -30,16 +30,20 @@ export interface EnergyData {
   timestamp: string;
 }
 
+export type AlarmLevel = '严重' | '一般' | '轻微';
+export type AlarmStatus = 'pending' | 'resolved';
+
 export interface Alarm {
   id: number;
   equipment_id: number;
   user_id: number;
   type: string;
-  level: string;
+  level: AlarmLevel;
   message: string;
-  status: string;
+  status: AlarmStatus;
   created_at: string;
-  resolved_at: string;
+  /** 仅当 status 为 resolved 时存在 */
+  resolved_at?: string;
 }
 
 export interface Price {
@@ -68,14 +72,4 @@ export interface EnergyStats {
   water_cost: number;
   peak_power: number;
   avg_power: number;
-}
-
-export interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    borderColor?: string;
-    backgroundColor?: string;
-  }[];
 }

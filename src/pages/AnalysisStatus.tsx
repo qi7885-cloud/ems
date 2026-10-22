@@ -1,4 +1,24 @@
-import { Activity, Clock, TrendingUp, Pause } from 'lucide-react';
+import { Activity, Pause } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import Empty from '../components/Empty';
+import { cn } from '../lib/utils';
+
+// 24 小时状态柱状图的语义配色：工作=正常绿、午休=预警橙、下班=强调青、非工作=停（弱灰）
+const HOUR_TONE: Record<string, string> = {
+  工作: 'bg-ok',
+  午休: 'bg-warn',
+  下班: 'bg-accent',
+  非工作: 'bg-ink-3',
+};
+
+const HOUR_LEGEND = [
+  { label: '工作', cls: 'bg-ok' },
+  { label: '午休', cls: 'bg-warn' },
+  { label: '下班', cls: 'bg-accent' },
+  { label: '非工作', cls: 'bg-ink-3' },
+];
 
 export default function AnalysisStatus() {
   const statusData = [
@@ -21,91 +41,134 @@ export default function AnalysisStatus() {
     { hour: '19:00', power: 2500, status: '非工作' },
   ];
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">能耗状态分析</h1>
-        <p className="text-gray-500 mt-1">分析工作与非工作时段的能耗差异</p>
-      </div>
+  // 指标全部由现有 12 个整点采样派生（每个采样点视作一个设备状态读数）：
+  // 设备总数=采样点数；运行中/待机/离线=对应状态计数；平均负载率=平均功率/峰值功率。
+  const sampleCount = workingHours.length;
+  const runningCount = workingHours.filter((h) => h.status === '工作').length;
+  const standbyCount = workingHours.filter((h) => h.status === '午休').length;
+  const offlineCount = workingHours.filter((h) => h.status === '下班' || h.status === '非工作').length;
+  const maxHourlyPower = Math.max(...workingHours.map((h) => h.power));
+  const sumHourlyPower = workingHours.reduce((sum, h) => sum + h.power, 0);
+  const avgLoadRate = sampleCount > 0 ? ((sumHourlyPower / sampleCount / maxHourlyPower) * 100).toFixed(1) : '0.0';
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">工作状态能耗占比</h2>
-          <div className="flex items-center justify-center h-48">
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="12" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="12" strokeDasharray={`${76 * 2.51} 251`} />
+  return (
+    <div className="space-y-3">
+      <PageHeader title="能耗状态分析" description="分析工作与非工作时段的能耗差异" />
+
+      <MetricStrip
+        cols={5}
+        items={[
+          { label: '设备总数', value: sampleCount, unit: '台', note: '整点采样点' },
+          { label: '运行中', value: runningCount, unit: '台', tone: 'ok', note: '工作时段' },
+          { label: '待机', value: standbyCount, unit: '台', tone: 'warn', note: '午休时段' },
+          { label: '离线', value: offlineCount, unit: '台', note: '下班/非工作' },
+          { label: '平均负载率', value: avgLoadRate, unit: '%', tone: 'accent', note: '相对峰值功率' },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <Panel title="工作状态能耗占比">
+          <div className="flex items-center gap-6">
+            <div className="relative h-36 w-36 shrink-0">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" strokeWidth="10" className="stroke-line-strong" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  className="stroke-ok"
+                  strokeDasharray={`${statusData[0].percentage * 2.51} 251`}
+                />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-gray-900">76%</span>
-                <span className="text-sm text-gray-500">工作时段</span>
+                <span className="metric-value text-ok">{statusData[0].percentage}%</span>
+                <span className="mt-1 text-[11px] text-ink-3">工作时段占比</span>
+              </div>
+            </div>
+            <div className="min-w-0 flex-1 space-y-2 text-[12px]">
+              <div className="flex items-center justify-between">
+                <span className="text-ink-2">工作时段能耗</span>
+                <span className="font-mono text-ink">{statusData[0].power.toLocaleString()} kWh</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-ink-2">非工作时段能耗</span>
+                <span className="font-mono text-ink">{statusData[1].power.toLocaleString()} kWh</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-line pt-2">
+                <span className="text-ink-2">工作 / 非工作</span>
+                <span className="font-mono text-accent">
+                  {(statusData[0].power / statusData[1].power).toFixed(1)} : 1
+                </span>
               </div>
             </div>
           </div>
-        </div>
+        </Panel>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">状态对比</h2>
+        <Panel title="状态对比" aside={<span className="font-mono text-[11px]">kWh</span>}>
           <div className="space-y-4">
             {statusData.map((item, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className={`w-12 h-12 ${index === 0 ? 'bg-green-100' : 'bg-gray-100'} rounded-xl flex items-center justify-center`}>
+              <div key={item.period} className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-line bg-inset">
                   {index === 0 ? (
-                    <Activity className="w-6 h-6 text-green-600" />
+                    <Activity className="h-4 w-4 text-ok" />
                   ) : (
-                    <Pause className="w-6 h-6 text-gray-600" />
+                    <Pause className="h-4 w-4 text-ink-3" />
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">{item.period}</span>
-                    <span className="text-gray-600">{item.power.toLocaleString()} kWh</span>
+                    <span className="text-[13px] text-ink">{item.period}</span>
+                    <span className="font-mono text-[12px] text-ink-2">{item.power.toLocaleString()}</span>
                   </div>
-                  <div className="mt-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="progress-bar mt-1.5">
                     <div
-                      className={`h-full ${index === 0 ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}
+                      className={cn('progress-fill', index === 0 ? 'bg-ok' : 'bg-ink-3')}
                       style={{ width: `${item.percentage}%` }}
                     />
                   </div>
                 </div>
+                <span className="w-10 shrink-0 text-right font-mono text-[12px] text-ink-2">
+                  {item.percentage}%
+                </span>
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">24小时能耗曲线</h2>
-        <div className="h-48 flex items-end justify-between gap-2">
-          {workingHours.map((hour, index) => (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div
-                className={`w-full rounded-t ${
-                  hour.status === '工作' ? 'bg-green-500' :
-                  hour.status === '午休' ? 'bg-yellow-500' : 'bg-gray-400'
-                }`}
-                style={{ height: `${(hour.power / 10000) * 180}px` }}
-              />
-              <span className="text-xs text-gray-500 mt-2">{hour.hour}</span>
+      <Panel title="24 小时能耗与状态" aside={<span className="font-mono text-[11px]">单位 kW</span>}>
+        {workingHours.length === 0 ? (
+          <Empty title="暂无数据" description="未采集到整点能耗数据" />
+        ) : (
+          <>
+            <div className="flex h-48 items-end gap-1.5">
+              {workingHours.map((hour) => (
+                <div key={hour.hour} className="flex h-full flex-1 flex-col items-center">
+                  <div className="flex w-full flex-1 items-end">
+                    <div
+                      className={cn('w-full rounded-t-sm', HOUR_TONE[hour.status] ?? 'bg-ink-3')}
+                      style={{ height: `${(hour.power / 10000) * 100}%` }}
+                      title={`${hour.hour} · ${hour.power} kW`}
+                    />
+                  </div>
+                  <span className="mt-1.5 font-mono text-[10px] text-ink-3">{hour.hour.slice(0, 2)}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="flex items-center justify-center gap-6 mt-4">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-green-500 rounded-full" />
-            <span className="text-sm text-gray-600">工作</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-yellow-500 rounded-full" />
-            <span className="text-sm text-gray-600">午休</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-gray-400 rounded-full" />
-            <span className="text-sm text-gray-600">非工作</span>
-          </div>
-        </div>
-      </div>
+            <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-line pt-3">
+              {HOUR_LEGEND.map((item) => (
+                <span key={item.label} className="flex items-center gap-1.5 text-[12px] text-ink-2">
+                  <span className={cn('h-3 w-3 rounded-sm', item.cls)} />
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </Panel>
     </div>
   );
 }

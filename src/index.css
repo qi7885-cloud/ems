@@ -2,13 +2,504 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  line-height: 1.5;
-  font-weight: 400;
+/* ================================================================
+   工业控制台设计令牌
+   ----------------------------------------------------------------
+   默认（:root）为「深色工业控制台」—— 深蓝灰底 + 控制青强调，
+   对标 SCADA / DCS / HMI 组态界面的观感：低饱和、高对比、
+   边框清晰、几乎无动效。
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+   html.light 覆盖为「浅色工业风」，页面里的语义类名两套通用。
+   ================================================================ */
+:root {
+  /* 画布与面板 */
+  --c-canvas: 8 13 18;        /* #080d12 */
+  --c-panel: 17 24 33;        /* #111821 */
+  --c-panel-2: 23 33 44;      /* #17212c */
+  --c-inset: 12 18 25;        /* #0c1219 */
+  --c-hover: 30 43 57;        /* #1e2b39 */
+  /* 分隔线 */
+  --c-line: 33 47 62;         /* #212f3e */
+  --c-line-strong: 49 68 88;  /* #314458 */
+  /* 文字 */
+  --c-ink: 224 234 243;       /* #e0eaf3 */
+  --c-ink-2: 150 169 188;     /* #96a9bc */
+  --c-ink-3: 104 124 145;     /* #687c91 */
+  /* 强调色：控制青 */
+  --c-accent: 34 211 238;     /* #22d3ee */
+  --c-accent-dim: 14 116 144; /* #0e7490 */
+  /* 状态语义色 */
+  --c-ok: 52 211 153;         /* 运行 / 正常 */
+  --c-warn: 245 165 36;       /* 预警 */
+  --c-danger: 248 113 113;    /* 告警 / 故障 */
+  --c-info: 56 189 248;       /* 信息 */
+  --c-offline: 100 116 139;   /* 离线 / 停用 */
+
+  color-scheme: dark;
+}
+
+html.light {
+  --c-canvas: 237 241 245;    /* #edf1f5 */
+  --c-panel: 255 255 255;
+  --c-panel-2: 246 248 251;
+  --c-inset: 240 243 247;
+  --c-hover: 232 238 244;
+  --c-line: 214 222 231;
+  --c-line-strong: 184 196 209;
+  --c-ink: 15 26 36;
+  --c-ink-2: 71 87 106;
+  --c-ink-3: 108 126 144;
+  --c-accent: 8 145 178;
+  --c-accent-dim: 21 94 117;
+  --c-ok: 5 150 105;
+  --c-warn: 180 83 9;
+  --c-danger: 220 38 38;
+  --c-info: 2 132 199;
+  --c-offline: 100 116 139;
+
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: rgb(var(--c-canvas));
+    /* 极淡的工程网格底纹：只在面板之间的缝隙里透出来 */
+    background-image:
+      linear-gradient(rgb(var(--c-line) / 0.28) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-line) / 0.28) 1px, transparent 1px);
+    background-size: 44px 44px;
+    color: rgb(var(--c-ink));
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+      'PingFang SC', 'Microsoft YaHei', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 400;
+    /* 数据右对齐可扫读：全局等宽数字 */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+  }
+
+  ::selection {
+    background: rgb(var(--c-accent) / 0.3);
+    color: rgb(var(--c-ink));
+  }
+
+  /* 工业风滚动条：细、深、不抢视线 */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--c-inset));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--c-line-strong));
+    border: 2px solid rgb(var(--c-inset));
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--c-ink-3));
+  }
+  ::-webkit-scrollbar-corner {
+    background: rgb(var(--c-inset));
+  }
+
+  /* ---------- 表单控件：全局统一，页面无需重复写样式 ---------- */
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    background-color: rgb(var(--c-inset));
+    border: 1px solid rgb(var(--c-line));
+    border-radius: 3px;
+    color: rgb(var(--c-ink));
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: rgb(var(--c-accent) / 0.7);
+    box-shadow: 0 0 0 2px rgb(var(--c-accent) / 0.15);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(var(--c-ink-3));
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    accent-color: rgb(var(--c-accent));
+  }
+
+  input[type='range'] {
+    accent-color: rgb(var(--c-accent));
+  }
+
+  /* ---------- 表格：全局统一为紧凑数据网格 ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background-color: rgb(var(--c-panel-2));
+    border-bottom: 1px solid rgb(var(--c-line-strong));
+    color: rgb(var(--c-ink-3));
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    border-bottom: 1px solid rgb(var(--c-line));
+    padding: 9px 12px;
+    vertical-align: middle;
+    color: rgb(var(--c-ink));
+  }
+
+  /* 隔行底色：长表格扫读时不易串行 */
+  tbody tr:nth-child(even) {
+    background-color: rgb(var(--c-panel-2) / 0.5);
+  }
+
+  tbody tr:hover {
+    background-color: rgb(var(--c-hover) / 0.75);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* 数值列等宽对齐 */
+  td,
+  th {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 键盘可达性：工业场景常有键盘操作 */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-accent) / 0.6);
+    outline-offset: 1px;
+  }
+}
+
+@layer components {
+  /* ---------------- 面板 ---------------- */
+  .panel {
+    @apply rounded border border-line bg-panel;
+  }
+
+  .panel-head {
+    @apply flex items-center justify-between gap-3 border-b border-line px-4 py-2.5;
+  }
+
+  .panel-title {
+    @apply flex items-center gap-2 text-[13px] font-semibold text-ink;
+  }
+
+  /* 面板标题左侧的青色标识条 */
+  .panel-title::before {
+    content: '';
+    @apply inline-block h-3.5 w-[3px] shrink-0 rounded-sm bg-accent;
+  }
+
+  .panel-body {
+    @apply p-4;
+  }
+
+  /* 兼容旧类名：老页面用的 chart-container / stat-card / glass-card 全部
+     收敛为同一套工业面板外观，无需逐页改类名。 */
+  .chart-container,
+  .stat-card,
+  .glass-card {
+    @apply rounded border border-line bg-panel;
+    background-image: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .stat-card:hover,
+  .chart-container:hover {
+    @apply border-line-strong;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ---------------- 按钮 ---------------- */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-1.5 whitespace-nowrap rounded border px-3 py-1.5 text-[13px] font-medium transition-colors duration-100;
+  }
+
+  .btn-primary {
+    @apply btn border-accent/60 bg-accent/15 text-accent hover:bg-accent/25;
+  }
+
+  .btn-secondary {
+    @apply btn border-line bg-panel-2 text-ink-2 hover:border-line-strong hover:bg-hover hover:text-ink;
+  }
+
+  .btn-danger {
+    @apply btn border-danger/50 bg-danger/10 text-danger hover:bg-danger/20;
+  }
+
+  .btn-ghost {
+    @apply btn border-transparent bg-transparent text-ink-2 hover:bg-hover hover:text-ink;
+  }
+
+  /* ---------------- 状态标签 ---------------- */
+  .tag {
+    @apply inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-2xs font-semibold leading-none;
+  }
+
+  .tag-ok {
+    @apply tag border-ok/40 bg-ok/10 text-ok;
+  }
+
+  .tag-warn {
+    @apply tag border-warn/40 bg-warn/10 text-warn;
+  }
+
+  .tag-danger {
+    @apply tag border-danger/40 bg-danger/10 text-danger;
+  }
+
+  .tag-info {
+    @apply tag border-info/40 bg-info/10 text-info;
+  }
+
+  .tag-offline {
+    @apply tag border-line-strong bg-offline/10 text-ink-3;
+  }
+
+  .tag-accent {
+    @apply tag border-accent/40 bg-accent/10 text-accent;
+  }
+
+  /* 兼容旧的 alert-badge（部分页面仍在使用） */
+  .alert-badge {
+    @apply tag;
+  }
+
+  /* ---------------- 表单 ---------------- */
+  .field {
+    @apply h-[30px] rounded-sm border border-line bg-inset px-2 text-[13px] text-ink;
+  }
+
+  .label {
+    @apply mb-1 block text-2xs font-medium uppercase tracking-wide text-ink-3;
+  }
+
+  /* ---------------- 页面骨架 ---------------- */
+  .page-head {
+    @apply mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3;
+  }
+
+  .page-title {
+    @apply text-[17px] font-semibold leading-tight tracking-tight text-ink;
+  }
+
+  .page-desc {
+    @apply mt-1 text-[12px] text-ink-3;
+  }
+
+  .toolbar {
+    @apply flex flex-wrap items-center gap-2 rounded border border-line bg-panel px-3 py-2;
+  }
+
+  /* 指标条（比大卡片更省纵向空间） */
+  .metric {
+    @apply rounded border border-line bg-panel px-3 py-2.5;
+  }
+
+  .metric-label {
+    @apply text-2xs uppercase tracking-wide text-ink-3;
+  }
+
+  .metric-value {
+    @apply font-mono text-[22px] font-semibold leading-none text-ink;
+  }
+
+  .metric-unit {
+    @apply ml-1 text-[12px] font-normal text-ink-3;
+  }
+
+  /* ---------------- 进度条 ---------------- */
+  .progress-bar {
+    @apply h-1.5 overflow-hidden rounded-sm bg-inset;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-sm transition-all duration-500 ease-out;
+  }
+
+  /* ---------------- 导航（兼容旧类名） ---------------- */
+  .nav-item {
+    @apply flex items-center gap-2.5 rounded px-3 py-2 text-[13px] transition-colors duration-100;
+  }
+
+  .nav-item-active {
+    @apply bg-accent/10 text-accent;
+  }
+
+  .nav-item-hover {
+    @apply text-ink-2 hover:bg-hover hover:text-ink;
+  }
+
+  /* ---------------- 状态圆点 ---------------- */
+  .status-dot {
+    @apply inline-block h-2 w-2 shrink-0 rounded-full;
+  }
+
+  .status-online {
+    @apply bg-ok;
+    box-shadow: 0 0 6px rgb(var(--c-ok) / 0.7);
+  }
+
+  .status-warning {
+    @apply bg-warn;
+    box-shadow: 0 0 6px rgb(var(--c-warn) / 0.7);
+  }
+
+  .status-danger {
+    @apply bg-danger;
+    box-shadow: 0 0 6px rgb(var(--c-danger) / 0.7);
+  }
+
+  /* ---------------- 弱化旧装饰类 ---------------- */
+  /* 消费级的渐变文字 / 光晕 / 3D 翻转在工业界面里没有位置，
+     这里统一降级为普通样式，避免逐页清理。 */
+  .gradient-text,
+  .gradient-text-secondary {
+    @apply text-ink;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .gradient-border,
+  .glow-effect {
+    background: none;
+    box-shadow: none;
+  }
+
+  .gradient-border::before {
+    display: none;
+  }
+
+  .card-3d,
+  .card-3d-inner,
+  .shimmer {
+    perspective: none;
+    transform: none;
+    transform-style: flat;
+  }
+
+  .shimmer::after {
+    display: none;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 等宽数字（默认已全局开启，需要强制时用） */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 栅格底纹局部使用 */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgb(var(--c-line) / 0.45) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-line) / 0.45) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+}
+
+/* ================================================================
+   动效策略：工业界面只在必要时动
+   - 保留状态灯的呼吸（表示数据实时）
+   - 入场 / 位移 / 漂浮 / 流光一律关闭
+   ================================================================ */
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgb(var(--c-ok) / 0.55);
+  }
+  50% {
+    opacity: 0.75;
+    box-shadow: 0 0 0 5px rgb(var(--c-ok) / 0);
+  }
+}
+
+@keyframes led-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-fade-in,
+.animate-fade-in-up,
+.animate-slide-in-left,
+.animate-slide-in-right,
+.animate-scale-in,
+.animate-float,
+.animate-gradient-shift {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+/* 告警指示灯：更急促的闪烁，用于「未处理」状态 */
+.animate-led {
+  animation: led-blink 1.4s steps(2, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-soft,
+  .animate-led {
+    animation: none;
+  }
 }

@@ -1,136 +1,228 @@
-import { useState } from 'react';
-import { Search, Calendar, Filter, Download, RefreshCw } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Search, Download, RefreshCw } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import Empty from '../components/Empty';
+
+interface MonitorParam {
+  id: number;
+  equipment: string;
+  parameter: string;
+  value: string;
+  unit: string;
+  time: string;
+}
+
+interface Filters {
+  equipment: string;
+  startDate: string;
+  endDate: string;
+}
+
+const INITIAL_FILTERS: Filters = { equipment: 'all', startDate: '2024-06-01', endDate: '2024-06-07' };
+
+const MONITOR_PARAMETERS: MonitorParam[] = [
+  { id: 1, equipment: '主配电柜', parameter: '电流', value: '450 A', unit: 'A', time: '2024-06-07 14:30' },
+  { id: 2, equipment: '主配电柜', parameter: '电压', value: '10.5', unit: 'kV', time: '2024-06-07 14:30' },
+  { id: 3, equipment: '变压器A', parameter: '温度', value: '65', unit: '°C', time: '2024-06-07 14:28' },
+  { id: 4, equipment: '变压器A', parameter: '负载率', value: '78', unit: '%', time: '2024-06-07 14:28' },
+  { id: 5, equipment: '变压器B', parameter: '温度', value: '58', unit: '°C', time: '2024-06-07 14:25' },
+  { id: 6, equipment: '变压器B', parameter: '负载率', value: '62', unit: '%', time: '2024-06-07 14:25' },
+  { id: 7, equipment: '水表-1号', parameter: '流量', value: '450', unit: '吨', time: '2024-06-07 14:30' },
+  { id: 8, equipment: '水表-1号', parameter: '累计', value: '8500', unit: '吨', time: '2024-06-07 14:30' },
+];
+
+/** 统一的过滤逻辑：设备精确匹配 + 日期区间（按 time 的日期部分）+ 关键字模糊搜索 */
+const filterParameters = (filters: Filters, keyword: string): MonitorParam[] => {
+  const kw = keyword.trim().toLowerCase();
+  return MONITOR_PARAMETERS.filter((param) => {
+    if (filters.equipment !== 'all' && param.equipment !== filters.equipment) return false;
+
+    const day = param.time.slice(0, 10); // '2024-06-07'
+    if (filters.startDate && day < filters.startDate) return false;
+    if (filters.endDate && day > filters.endDate) return false;
+
+    if (
+      kw &&
+      !param.equipment.toLowerCase().includes(kw) &&
+      !param.parameter.toLowerCase().includes(kw)
+    ) {
+      return false;
+    }
+    return true;
+  });
+};
+
+const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
 
 export default function ParameterQuery() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [startDate, setStartDate] = useState('2024-06-01');
-  const [endDate, setEndDate] = useState('2024-06-07');
-  const [selectedEquipment, setSelectedEquipment] = useState('all');
+  const [selectedEquipment, setSelectedEquipment] = useState(INITIAL_FILTERS.equipment);
+  const [startDate, setStartDate] = useState(INITIAL_FILTERS.startDate);
+  const [endDate, setEndDate] = useState(INITIAL_FILTERS.endDate);
+  const [appliedFilters, setAppliedFilters] = useState<Filters>(INITIAL_FILTERS);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
-  const mockParameters = [
-    { id: 1, equipment: '主配电柜', parameter: '电流', value: '450 A', unit: 'A', time: '2024-06-07 14:30' },
-    { id: 2, equipment: '主配电柜', parameter: '电压', value: '10.5', unit: 'kV', time: '2024-06-07 14:30' },
-    { id: 3, equipment: '变压器A', parameter: '温度', value: '65', unit: '°C', time: '2024-06-07 14:28' },
-    { id: 4, equipment: '变压器A', parameter: '负载率', value: '78', unit: '%', time: '2024-06-07 14:28' },
-    { id: 5, equipment: '变压器B', parameter: '温度', value: '58', unit: '°C', time: '2024-06-07 14:25' },
-    { id: 6, equipment: '变压器B', parameter: '负载率', value: '62', unit: '%', time: '2024-06-07 14:25' },
-    { id: 7, equipment: '水表-1号', parameter: '流量', value: '450', unit: '吨', time: '2024-06-07 14:30' },
-    { id: 8, equipment: '水表-1号', parameter: '累计', value: '8500', unit: '吨', time: '2024-06-07 14:30' },
-  ];
-
-  const filteredParameters = mockParameters.filter((param) =>
-    param.equipment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    param.parameter.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredParameters = useMemo(
+    () => filterParameters(appliedFilters, searchTerm),
+    [appliedFilters, searchTerm],
   );
 
+  const handleQuery = () => {
+    const next: Filters = { equipment: selectedEquipment, startDate, endDate };
+    setAppliedFilters(next);
+    setFeedback(`已按当前条件查询，共 ${filterParameters(next, searchTerm).length} 条`);
+  };
+
+  const handleReset = () => {
+    setSelectedEquipment(INITIAL_FILTERS.equipment);
+    setStartDate(INITIAL_FILTERS.startDate);
+    setEndDate(INITIAL_FILTERS.endDate);
+    setAppliedFilters(INITIAL_FILTERS);
+    setSearchTerm('');
+    setFeedback(null);
+  };
+
+  const handleExport = () => {
+    const header = ['设备名称', '参数名称', '数值', '单位', '采集时间'];
+    const rows = filteredParameters.map((param) => [
+      param.equipment,
+      param.parameter,
+      param.value,
+      param.unit,
+      param.time,
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+
+    // \uFEFF 为 BOM，保证 Excel 正确识别中文
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `监测参数_${appliedFilters.endDate || '全部'}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">监测参数查询</h1>
-        <p className="text-gray-500 mt-1">查询历史监测数据和参数信息</p>
+    <div className="space-y-3">
+      <PageHeader title="监测参数查询" description="查询历史监测数据和参数信息">
+        <button onClick={handleQuery} className="btn-primary">
+          <Search className="h-3.5 w-3.5" />
+          查询
+        </button>
+        <button onClick={handleReset} className="btn-secondary">
+          <RefreshCw className="h-3.5 w-3.5" />
+          刷新
+        </button>
+        <button onClick={handleExport} className="btn-secondary">
+          <Download className="h-3.5 w-3.5" />
+          导出
+        </button>
+      </PageHeader>
+
+      <div className="toolbar">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] uppercase tracking-wide text-ink-3">设备</span>
+          <select
+            value={selectedEquipment}
+            onChange={(e) => {
+              setSelectedEquipment(e.target.value);
+              setFeedback(null);
+            }}
+            className="field h-7 min-w-[120px]"
+          >
+            <option value="all">全部设备</option>
+            <option value="主配电柜">主配电柜</option>
+            <option value="变压器A">变压器A</option>
+            <option value="变压器B">变压器B</option>
+            <option value="水表-1号">水表-1号</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] uppercase tracking-wide text-ink-3">开始</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setFeedback(null);
+            }}
+            className="field h-7"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] uppercase tracking-wide text-ink-3">结束</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setFeedback(null);
+            }}
+            className="field h-7"
+          />
+        </div>
+
+        <div className="relative flex items-center">
+          <Search className="absolute left-2 h-3.5 w-3.5 text-ink-3" />
+          <input
+            type="text"
+            placeholder="搜索设备或参数…"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setFeedback(null);
+            }}
+            className="field h-7 w-56 pl-7"
+          />
+        </div>
+
+        {feedback && <span className="ml-auto font-mono text-[11px] text-accent">{feedback}</span>}
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">设备选择</label>
-            <select
-              value={selectedEquipment}
-              onChange={(e) => setSelectedEquipment(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">全部设备</option>
-              <option value="主配电柜">主配电柜</option>
-              <option value="变压器A">变压器A</option>
-              <option value="变压器B">变压器B</option>
-              <option value="水表-1号">水表-1号</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">结束日期</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <div className="flex items-end gap-2">
-            <button className="flex-1 px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-              查询
-            </button>
-            <button className="p-2.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors" title="刷新">
-              <RefreshCw className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="搜索设备或参数..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
-              <Filter className="w-5 h-5" />
-              筛选
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-              <Download className="w-5 h-5" />
-              导出
-            </button>
-          </div>
-        </div>
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">设备名称</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">参数名称</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">数值</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">单位</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">采集时间</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filteredParameters.map((param) => (
-              <tr key={param.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">{param.equipment}</td>
-                <td className="px-6 py-4 text-gray-600">{param.parameter}</td>
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">
-                    {param.value}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-gray-600">{param.unit}</td>
-                <td className="px-6 py-4 text-gray-600">{param.time}</td>
+      <Panel
+        title="监测参数"
+        aside={<span className="font-mono">共 {filteredParameters.length} 条</span>}
+        flush
+      >
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>设备名称</th>
+                <th>参数名称</th>
+                <th className="text-right">数值</th>
+                <th>单位</th>
+                <th>采集时间</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredParameters.length === 0 ? (
+                <tr>
+                  <td colSpan={5}>
+                    <Empty title="没有符合条件的记录" description="试试放宽设备或日期范围" />
+                  </td>
+                </tr>
+              ) : (
+                filteredParameters.map((param) => (
+                  <tr key={param.id}>
+                    <td className="font-medium text-ink">{param.equipment}</td>
+                    <td className="text-ink-2">{param.parameter}</td>
+                    <td className="text-right font-mono text-accent">{param.value}</td>
+                    <td className="text-ink-2">{param.unit}</td>
+                    <td className="font-mono text-ink-2">{param.time}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   );
 }

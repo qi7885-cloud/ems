@@ -1,118 +1,163 @@
 import { categoryEnergyData } from '../data/mockData';
-import { Droplets, Zap, Factory, Building2, Lightbulb } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import { cn } from '../lib/utils';
+import { Droplets, Zap, Factory, Building2, Lightbulb, TrendingDown, TrendingUp } from 'lucide-react';
+
+const categoryIcons = {
+  造纸车间: Factory,
+  水处理车间: Droplets,
+  配电室: Zap,
+  办公楼: Building2,
+  其他: Lightbulb,
+};
+
+/** 分类占比条配色，全部来自语义令牌 */
+const categoryColors = {
+  造纸车间: 'bg-accent',
+  水处理车间: 'bg-accent',
+  配电室: 'bg-ok',
+  办公楼: 'bg-warn',
+  其他: 'bg-info',
+};
 
 export default function ClassifiedEnergy() {
-  const categoryIcons = {
-    '造纸车间': Factory,
-    '水处理车间': Droplets,
-    '配电室': Zap,
-    '办公楼': Building2,
-    '其他': Lightbulb,
-  };
-
-  const categoryColors = {
-    '造纸车间': 'bg-blue-500',
-    '水处理车间': 'bg-cyan-500',
-    '配电室': 'bg-green-500',
-    '办公楼': 'bg-yellow-500',
-    '其他': 'bg-purple-500',
-  };
+  // 汇总指标全部由现有分类数据派生
+  const totalPower = categoryEnergyData.reduce((sum, item) => sum + item.power, 0);
+  const maxUnitEnergy = categoryEnergyData.length
+    ? Math.max(...categoryEnergyData.map((item) => item.unitEnergy))
+    : 0;
+  const avgYoy = categoryEnergyData.length
+    ? categoryEnergyData.reduce((sum, item) => sum + item.yoy, 0) / categoryEnergyData.length
+    : 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">分类能耗监测</h1>
-        <p className="text-gray-500 mt-1">按部门/区域/设备分类监测能耗数据</p>
-      </div>
+    <div className="space-y-3">
+      <PageHeader title="分类能耗监测" description="按部门/区域/设备分类监测能耗数据" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <MetricStrip
+        cols={4}
+        items={[
+          { label: '总能耗', value: totalPower, unit: 'kWh', icon: Zap, note: '分类之和' },
+          { label: '分类数', value: categoryEnergyData.length, unit: '类', icon: Building2, note: '在用分类' },
+          {
+            label: '最高单位能耗',
+            value: maxUnitEnergy,
+            unit: 'kWh/吨',
+            icon: Factory,
+            tone: 'warn',
+            note: '需重点管控',
+          },
+          {
+            label: '平均同比',
+            value: avgYoy.toFixed(1),
+            unit: '%',
+            icon: TrendingDown,
+            tone: avgYoy <= 0 ? 'ok' : 'danger',
+            note: avgYoy <= 0 ? '同比下降' : '同比上升',
+          },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {categoryEnergyData.map((item) => {
           const IconComponent = categoryIcons[item.category as keyof typeof categoryIcons] || Lightbulb;
-          const colorClass = categoryColors[item.category as keyof typeof categoryColors] || 'bg-gray-500';
-          
+          const colorClass = categoryColors[item.category as keyof typeof categoryColors] || 'bg-ink-3';
+
           return (
-            <div
+            <Panel
               key={item.category}
-              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+              title={item.category}
+              aside={<IconComponent className="h-3.5 w-3.5 text-ink-3" />}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 ${colorClass} rounded-xl flex items-center justify-center`}>
-                  <IconComponent className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{item.percentage}%</span>
+              <div className="flex items-baseline justify-between">
+                <span className="metric-value">{item.percentage}<span className="metric-unit">%</span></span>
+                <span className="font-mono text-[11px] text-ink-3">{item.power.toLocaleString()} kWh</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.category}</h3>
-              <p className="text-gray-600">用电量: {item.power.toLocaleString()} kWh</p>
-              
-              <div className="mt-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-500">占比</span>
-                  <span className="font-medium text-gray-900">{item.percentage}%</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${colorClass} rounded-full transition-all`}
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
+              <div className="progress-bar mt-3">
+                <div className={cn('progress-fill', colorClass)} style={{ width: `${item.percentage}%` }} />
               </div>
-            </div>
+              <div className="mt-2 flex items-center justify-between font-mono text-[11px] text-ink-3">
+                <span>占比</span>
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1',
+                    item.yoy <= 0 ? 'text-ok' : 'text-danger',
+                  )}
+                >
+                  {item.yoy <= 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+                  {item.yoy > 0 ? '+' : ''}
+                  {item.yoy}%
+                </span>
+              </div>
+            </Panel>
           );
         })}
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">分类能耗明细</h2>
+      <Panel title="分类能耗明细" flush>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
+          <table>
+            <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">分类</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">用电量 (kWh)</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">占比</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">单位能耗</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">同比</th>
+                <th>分类</th>
+                <th className="text-right">用电量 (kWh)</th>
+                <th className="text-right">占比</th>
+                <th className="text-right">单位能耗 (kWh/吨)</th>
+                <th className="text-right">同比</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
-              {categoryEnergyData.map((item) => (
-                <tr key={item.category} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 ${categoryColors[item.category as keyof typeof categoryColors]} rounded-lg flex items-center justify-center`}>
-                        {(() => {
-                          const Icon = categoryIcons[item.category as keyof typeof categoryIcons];
-                          return Icon ? <Icon className="w-4 h-4 text-white" /> : null;
-                        })()}
+            <tbody>
+              {categoryEnergyData.map((item) => {
+                const Icon = categoryIcons[item.category as keyof typeof categoryIcons];
+                return (
+                  <tr key={item.category}>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {Icon && <Icon className="h-3.5 w-3.5 text-ink-3" />}
+                        <span className="font-medium text-ink">{item.category}</span>
                       </div>
-                      <span className="font-medium text-gray-900">{item.category}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{item.power.toLocaleString()}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${categoryColors[item.category as keyof typeof categoryColors]} rounded-full`}
-                          style={{ width: `${item.percentage}%` }}
-                        />
+                    </td>
+                    <td className="text-right font-mono">{item.power.toLocaleString()}</td>
+                    <td>
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="progress-bar w-20">
+                          <div
+                            className={cn(
+                              'progress-fill',
+                              categoryColors[item.category as keyof typeof categoryColors] || 'bg-ink-3',
+                            )}
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
+                        <span className="w-10 text-right font-mono">{item.percentage}%</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">{item.percentage}%</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">125 kWh/吨纸</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center gap-1 text-green-600 text-sm">
-                      <Zap className="w-4 h-4" />
-                      -3.2%
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="text-right font-mono">{item.unitEnergy}</td>
+                    <td className="text-right">
+                      <span
+                        className={cn(
+                          'inline-flex items-center justify-end gap-1 font-mono',
+                          item.yoy <= 0 ? 'text-ok' : 'text-danger',
+                        )}
+                      >
+                        {item.yoy <= 0 ? (
+                          <TrendingDown className="h-3 w-3" />
+                        ) : (
+                          <TrendingUp className="h-3 w-3" />
+                        )}
+                        {item.yoy > 0 ? '+' : ''}
+                        {item.yoy}%
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

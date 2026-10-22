@@ -1,159 +1,192 @@
-import { useState } from 'react';
-import { TrendingUp, TrendingDown, Calendar, ArrowRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
+import { monthOptions, seededValue } from '../data/mockData';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import { cn } from '../lib/utils';
+
+// 各项指标的取值范围，本月/上月都由所选月份作为 key 派生，切换月份数字必变
+const metricConfigs = [
+  { key: 'electricity', label: '用电量', unit: 'kWh', currentRange: [3600000, 3900000], prevRange: [3400000, 3650000] },
+  { key: 'water', label: '用水量', unit: '吨', currentRange: [23000, 25500], prevRange: [21500, 23600] },
+  { key: 'gas', label: '用气量', unit: 'm³', currentRange: [82000, 90000], prevRange: [78000, 85000] },
+  { key: 'cost', label: '总费用', unit: '元', currentRange: [2550000, 2780000], prevRange: [2400000, 2620000] },
+] as const;
+
+const monthLabel = (month: string) => `${Number(month.slice(5))}月`;
 
 export default function AnalysisMOM() {
   const [selectedMonth, setSelectedMonth] = useState('2024-06');
 
-  const momData = [
-    { category: '用电量', current: 3750000, previous: 3580000, change: 4.7, unit: 'kWh' },
-    { category: '用水量', current: 24000, previous: 22800, change: 5.3, unit: '吨' },
-    { category: '用气量', current: 85000, previous: 82000, change: 3.7, unit: 'm³' },
-    { category: '总费用', current: 2680000, previous: 2560000, change: 4.7, unit: '元' },
-  ];
+  // 环比 = (本月 - 上月) / 上月 × 100%
+  const momData = useMemo(
+    () =>
+      metricConfigs.map((metric) => {
+        const current = seededValue(`mom-${selectedMonth}-${metric.key}-current`, metric.currentRange[0], metric.currentRange[1], 0);
+        const previous = seededValue(`mom-${selectedMonth}-${metric.key}-previous`, metric.prevRange[0], metric.prevRange[1], 0);
+        const change = Number((((current - previous) / previous) * 100).toFixed(1));
+        return { category: metric.label, unit: metric.unit, current, previous, change };
+      }),
+    [selectedMonth],
+  );
 
-  const monthlyTrend = [
-    { month: '1月', value: 3100000 },
-    { month: '2月', value: 2950000 },
-    { month: '3月', value: 3200000 },
-    { month: '4月', value: 3350000 },
-    { month: '5月', value: 3580000 },
-    { month: '6月', value: 3750000 },
-  ];
+  // 趋势图各月取该月「用电量-本月」的同一派生值，所选月份的柱子与上方卡片一致；
+  // 上月序列沿用同一生成规则（区间取用电量 prevRange），用于本月/上月分组对比。
+  const monthlyTrend = useMemo(
+    () =>
+      monthOptions.map((month) => ({
+        month,
+        label: monthLabel(month),
+        current: seededValue(`mom-${month}-electricity-current`, 3600000, 3900000, 0),
+        previous: seededValue(`mom-${month}-electricity-previous`, 3400000, 3650000, 0),
+        active: month === selectedMonth,
+      })),
+    [selectedMonth],
+  );
 
-  const lastMonth = '2024-05';
-  const lastMonthData = {
-    electricity: 3580000,
-    water: 22800,
-    gas: 82000,
-    total: 2560000,
-  };
+  // 指标条以「用电量」为主口径（不同能源量纲不可相加）
+  const primary = momData.find((item) => item.category === '用电量') ?? momData[0];
+  const diff = primary.current - primary.previous;
+
+  const risingItems = momData.filter((item) => item.change > 0);
+  const fallingItems = momData.filter((item) => item.change < 0);
+  const barMax = 4000000;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">能耗环比分析</h1>
-          <p className="text-gray-500 mt-1">本月与上月数据进行对比分析</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-gray-500" />
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="2024-06">2024年6月</option>
-            <option value="2024-05">2024年5月</option>
-            <option value="2024-04">2024年4月</option>
-            <option value="2024-03">2024年3月</option>
-            <option value="2024-02">2024年2月</option>
-            <option value="2024-01">2024年1月</option>
-          </select>
-        </div>
-      </div>
+    <div className="space-y-3">
+      <PageHeader title="能耗环比分析" description="本月与上月数据进行对比分析">
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="field h-7"
+          aria-label="选择月份"
+        >
+          {monthOptions.map((month) => (
+            <option key={month} value={month}>
+              {month.replace('-', '年')}月
+            </option>
+          ))}
+        </select>
+      </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {momData.map((item, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-500">{item.category}</span>
-              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                item.change > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
-              }`}>
-                {item.change > 0 ? (
-                  <TrendingUp className="w-3 h-3" />
-                ) : (
-                  <TrendingDown className="w-3 h-3" />
-                )}
-                {item.change > 0 ? '+' : ''}{item.change}%
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold text-gray-900">{(item.current / 10000).toFixed(1)}</span>
-              <span className="text-gray-500">万 {item.unit}</span>
-            </div>
-            <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
-              <ArrowRight className="w-4 h-4" />
-              <span>上月: {(item.previous / 10000).toFixed(1)}万 {item.unit}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <MetricStrip
+        cols={4}
+        items={[
+          { label: '本月用电量', value: primary.current, unit: 'kWh', tone: 'accent', note: monthLabel(selectedMonth) },
+          { label: '上月用电量', value: primary.previous, unit: 'kWh', note: '上月同期' },
+          {
+            label: '环比',
+            value: `${primary.change > 0 ? '+' : ''}${primary.change}`,
+            unit: '%',
+            // 国内工业口径：能耗环比上升=恶化=danger 红，下降=改善=ok 绿
+            tone: primary.change > 0 ? 'danger' : 'ok',
+            note: primary.change > 0 ? '环比上升' : '环比下降',
+          },
+          {
+            label: '差值',
+            value: diff,
+            unit: 'kWh',
+            tone: primary.change > 0 ? 'danger' : 'ok',
+            note: '本月 − 上月',
+          },
+        ]}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">月度能耗趋势</h2>
-          <div className="h-64 flex items-end justify-between gap-4">
-            {monthlyTrend.map((month, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
+      <Panel
+        title="本月与上月用电量对比"
+        aside={
+          <span className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-sm bg-accent" />
+              本月
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-sm border border-line bg-line-strong" />
+              上月
+            </span>
+          </span>
+        }
+      >
+        <div className="flex h-56 items-end gap-3">
+          {monthlyTrend.map((month) => (
+            <div key={month.month} className="flex h-full flex-1 flex-col items-center">
+              <div className="flex w-full flex-1 items-end justify-center gap-1">
                 <div
-                  className={`w-full rounded-t transition-colors ${
-                    month.month === '6月' ? 'bg-blue-500' : 'bg-gray-300'
-                  }`}
-                  style={{ height: `${(month.value / 4000000) * 200}px` }}
+                  className={cn('w-1/2 rounded-t-sm bg-accent', !month.active && 'bg-accent/60')}
+                  style={{ height: `${(month.current / barMax) * 100}%` }}
+                  title={`${month.label} 本月 ${month.current.toLocaleString()} kWh`}
                 />
-                <span className="text-xs text-gray-500 mt-2">{month.month}</span>
+                <div
+                  className="w-1/2 rounded-t-sm border border-line bg-line-strong"
+                  style={{ height: `${(month.previous / barMax) * 100}%` }}
+                  title={`${month.label} 上月 ${month.previous.toLocaleString()} kWh`}
+                />
               </div>
-            ))}
-          </div>
+              <span
+                className={cn('mt-1.5 font-mono text-[11px]', month.active ? 'text-accent' : 'text-ink-3')}
+              >
+                {month.label}
+              </span>
+            </div>
+          ))}
         </div>
+      </Panel>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">本月对比上月</h2>
-          <div className="space-y-4">
-            {[
-              { label: '用电量', current: 3750000, previous: lastMonthData.electricity },
-              { label: '用水量', current: 24000, previous: lastMonthData.water },
-              { label: '用气量', current: 85000, previous: lastMonthData.gas },
-              { label: '总费用', current: 2680000, previous: lastMonthData.total },
-            ].map((item, index) => {
-              const percentage = (item.current / (item.current + item.previous)) * 100;
-              return (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-700">{item.label}</span>
-                    <span className="text-sm text-gray-500">
-                      {(item.current / 10000).toFixed(1)}万 vs {(item.previous / 10000).toFixed(1)}万
-                    </span>
-                  </div>
-                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full"
-                      style={{ width: `${percentage}%` }}
-                    />
-                    <div
-                      className="h-full bg-gray-300 rounded-full"
-                      style={{ width: `${100 - percentage}%`, marginLeft: `-${100 - percentage}%` }}
-                    />
-                  </div>
+      <Panel title="各指标本月对比上月" flush>
+        <ul className="divide-y divide-line">
+          {momData.map((item) => {
+            const percentage = (item.current / (item.current + item.previous)) * 100;
+            return (
+              <li key={item.category} className="flex items-center gap-3 px-4 py-2.5">
+                <span className="w-20 shrink-0 text-[13px] text-ink">{item.category}</span>
+                <div className="progress-bar flex flex-1">
+                  <div className="progress-fill bg-accent" style={{ width: `${percentage}%` }} />
+                  <div className="progress-fill bg-line-strong" style={{ width: `${100 - percentage}%` }} />
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                <span className="w-32 shrink-0 text-right font-mono text-[12px] text-ink-2">
+                  {(item.current / 10000).toFixed(1)} / {(item.previous / 10000).toFixed(1)} 万{item.unit}
+                </span>
+                <span
+                  className={cn(
+                    'inline-flex w-20 shrink-0 items-center justify-end gap-1 font-mono text-[12px]',
+                    item.change > 0 ? 'text-danger' : 'text-ok',
+                  )}
+                >
+                  {item.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {item.change > 0 ? '+' : ''}
+                  {item.change}%
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">环比分析摘要</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-800 mb-2">下降项</h3>
-            <p className="text-sm text-green-700">无</p>
+      <Panel title="环比分析摘要">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <div className="rounded border border-ok/40 bg-ok/10 p-3">
+            <h3 className="text-[13px] font-semibold text-ok">下降项</h3>
+            <p className="mt-1 text-[12px] text-ink-2">
+              {fallingItems.length > 0 ? fallingItems.map((item) => item.category).join('、') : '无'}
+            </p>
           </div>
-          <div className="p-4 bg-red-50 rounded-lg">
-            <h3 className="font-semibold text-red-800 mb-2">上升项</h3>
-            <p className="text-sm text-red-700">用电量、用水量、用气量、总费用</p>
+          <div className="rounded border border-danger/40 bg-danger/10 p-3">
+            <h3 className="text-[13px] font-semibold text-danger">上升项</h3>
+            <p className="mt-1 text-[12px] text-ink-2">
+              {risingItems.length > 0 ? risingItems.map((item) => item.category).join('、') : '无'}
+            </p>
           </div>
-          <div className="p-4 bg-yellow-50 rounded-lg">
-            <h3 className="font-semibold text-yellow-800 mb-2">主要原因</h3>
-            <p className="text-sm text-yellow-700">生产任务增加约12%</p>
+          <div className="rounded border border-warn/40 bg-warn/10 p-3">
+            <h3 className="text-[13px] font-semibold text-warn">主要原因</h3>
+            <p className="mt-1 text-[12px] text-ink-2">生产任务增加约12%</p>
           </div>
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">建议措施</h3>
-            <p className="text-sm text-blue-700">优化生产排班，合理安排设备运行</p>
+          <div className="rounded border border-accent/40 bg-accent/10 p-3">
+            <h3 className="text-[13px] font-semibold text-accent">建议措施</h3>
+            <p className="mt-1 text-[12px] text-ink-2">优化生产排班，合理安排设备运行</p>
           </div>
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

@@ -1,111 +1,150 @@
-import { Activity, Clock, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
+import { useMemo } from 'react';
+import { Activity, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
+import { getHourlyIntensity, generateTimeLabels } from '../data/mockData';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import Empty from '../components/Empty';
+
+type OperationStatus = 'normal' | 'warning' | 'error';
+
+interface OperationRow {
+  equipment: string;
+  status: OperationStatus;
+  uptime: string;
+  today: string;
+  efficiency: string;
+}
+
+/** 设备运行清单：汇总指标与表格均由此派生，保证数量口径一致 */
+const operationData: OperationRow[] = [
+  { equipment: '主配电柜', status: 'normal', uptime: '99.8%', today: '14小时30分', efficiency: '95%' },
+  { equipment: '变压器A', status: 'normal', uptime: '99.5%', today: '14小时', efficiency: '92%' },
+  { equipment: '变压器B', status: 'warning', uptime: '98.2%', today: '13小时45分', efficiency: '88%' },
+  { equipment: '水表-1号', status: 'normal', uptime: '99.9%', today: '14小时30分', efficiency: '100%' },
+  { equipment: '空压机', status: 'error', uptime: '95.0%', today: '12小时', efficiency: '75%' },
+];
+
+const statusConfig: Record<OperationStatus, { icon: typeof CheckCircle; tag: string; text: string }> = {
+  normal: { icon: CheckCircle, tag: 'tag-ok', text: '正常运行' },
+  warning: { icon: PauseCircle, tag: 'tag-warn', text: '性能下降' },
+  error: { icon: XCircle, tag: 'tag-danger', text: '故障' },
+};
+
+const CHART_HEIGHT = 120;
+
+/** 运行效率分档配色：≥90 ok / ≥80 warn / 其余 danger */
+const efficiencyBar = (efficiency: string) => {
+  const value = parseInt(efficiency);
+  if (value >= 90) return 'bg-ok';
+  if (value >= 80) return 'bg-warn';
+  return 'bg-danger';
+};
 
 export default function StatisticsOperation() {
-  const operationData = [
-    { equipment: '主配电柜', status: 'normal', uptime: '99.8%', today: '14小时30分', efficiency: '95%' },
-    { equipment: '变压器A', status: 'normal', uptime: '99.5%', today: '14小时', efficiency: '92%' },
-    { equipment: '变压器B', status: 'warning', uptime: '98.2%', today: '13小时45分', efficiency: '88%' },
-    { equipment: '水表-1号', status: 'normal', uptime: '99.9%', today: '14小时30分', efficiency: '100%' },
-    { equipment: '空压机', status: 'error', uptime: '95.0%', today: '12小时', efficiency: '75%' },
-  ];
+  // 确定性序列：同一 key 永远得到同一组柱高，避免重渲染时柱子跳动
+  const hourlyIntensity = useMemo(() => getHourlyIntensity('operation-hourly', 24), []);
+  const hourLabels = useMemo(() => generateTimeLabels(24), []);
 
-  const statusConfig = {
-    normal: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100', text: '正常运行' },
-    warning: { icon: PauseCircle, color: 'text-yellow-600', bg: 'bg-yellow-100', text: '性能下降' },
-    error: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100', text: '故障' },
-  };
-
-  const dailyStats = [
-    { label: '设备总数', value: '24', icon: Activity },
-    { label: '运行中', value: '21', icon: CheckCircle },
-    { label: '维护中', value: '2', icon: PauseCircle },
-    { label: '故障', value: '1', icon: XCircle },
-  ];
+  const metrics = useMemo(
+    () => [
+      { label: '设备总数', value: operationData.length, unit: '台', icon: Activity },
+      {
+        label: '运行中',
+        value: operationData.filter((i) => i.status === 'normal').length,
+        unit: '台',
+        icon: CheckCircle,
+        tone: 'ok' as const,
+      },
+      {
+        label: '维护中',
+        value: operationData.filter((i) => i.status === 'warning').length,
+        unit: '台',
+        icon: PauseCircle,
+        tone: 'warn' as const,
+      },
+      {
+        label: '故障',
+        value: operationData.filter((i) => i.status === 'error').length,
+        unit: '台',
+        icon: XCircle,
+        tone: 'danger' as const,
+      },
+    ],
+    [],
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">运行报表</h1>
-        <p className="text-gray-500 mt-1">设备运行状态统计和效率分析</p>
-      </div>
+    <div className="space-y-3">
+      <PageHeader title="运行报表" description="设备运行状态统计和效率分析" />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {dailyStats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <stat.icon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <MetricStrip cols={4} items={metrics} />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">设备名称</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">运行状态</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">设备可用率</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">今日运行时长</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">运行效率</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {operationData.map((item, index) => {
-              const config = statusConfig[item.status as keyof typeof statusConfig];
-              const StatusIcon = config.icon;
-              return (
-                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900">{item.equipment}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.color}`}>
-                      <StatusIcon className="w-3 h-3" />
-                      {config.text}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{item.uptime}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.today}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            parseInt(item.efficiency) >= 90 ? 'bg-green-500' :
-                            parseInt(item.efficiency) >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                          }`}
-                          style={{ width: item.efficiency }}
-                        />
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">{item.efficiency}</span>
-                    </div>
-                  </td>
+      <Panel title="设备运行清单" aside={<span className="font-mono text-[11px]">共 {operationData.length} 台</span>} flush>
+        {operationData.length === 0 ? (
+          <Empty title="暂无运行数据" description="当前没有可统计的设备运行记录" />
+        ) : (
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>设备名称</th>
+                  <th>运行状态</th>
+                  <th className="text-right">设备可用率</th>
+                  <th className="text-right">今日运行时长</th>
+                  <th>运行效率</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {operationData.map((item) => {
+                  const config = statusConfig[item.status];
+                  const StatusIcon = config.icon;
+                  return (
+                    <tr key={item.equipment}>
+                      <td className="font-medium text-ink">{item.equipment}</td>
+                      <td>
+                        <span className={config.tag}>
+                          <StatusIcon className="h-3 w-3" />
+                          {config.text}
+                        </span>
+                      </td>
+                      <td className="text-right font-mono text-ink-2">{item.uptime}</td>
+                      <td className="text-right font-mono text-ink-2">{item.today}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <div className="progress-bar w-16 shrink-0">
+                            <div className={`progress-fill ${efficiencyBar(item.efficiency)}`} style={{ width: item.efficiency }} />
+                          </div>
+                          <span className="font-mono text-[12px] text-ink">{item.efficiency}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">今日运行趋势</h2>
-        <div className="h-48 flex items-end justify-between gap-2">
-          {Array.from({ length: 24 }).map((_, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center">
+      <Panel
+        title="今日运行趋势"
+        description="纵轴：设备运行强度（相对值 0–100，每小时采样，数值越高表示该小时设备负载越高）"
+        aside={<span className="font-mono text-[11px]">0 – 100</span>}
+      >
+        <div className="flex items-end justify-between gap-2" style={{ height: `${CHART_HEIGHT + 24}px` }}>
+          {hourlyIntensity.map((value, index) => (
+            <div key={hourLabels[index]} className="flex h-full flex-1 flex-col items-center justify-end">
               <div
-                className="w-full bg-blue-500 rounded-t"
-                style={{ height: `${30 + Math.sin(i * 0.5) * 30 + Math.random() * 20}px` }}
+                className="w-full rounded-t bg-accent"
+                style={{ height: `${Math.max(8, Math.round(8 + value * 1.2))}px` }}
+                title={`${hourLabels[index]} 运行强度 ${value}`}
               />
-              <span className="text-xs text-gray-500 mt-2">{i}:00</span>
+              <span className="mt-2 font-mono text-[11px] text-ink-3">{hourLabels[index]}</span>
             </div>
           ))}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

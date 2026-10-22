@@ -1,208 +1,252 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import {
-  LayoutDashboard,
-  Activity,
-  Bell,
-  BarChart3,
-  TrendingUp,
-  Settings,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Zap,
-  Droplets,
-  Thermometer,
-  FileText,
-  Clock,
-  Database,
-  AlertTriangle,
-  Phone,
-  Network,
-  Gauge,
-} from 'lucide-react';
+import { ChevronDown, ChevronsLeft, ChevronsRight, Cpu, Zap } from 'lucide-react';
+import { menuItems } from '../config/navigation';
 
-const menuItems = [
-  { path: '/dashboard', label: '综合看板', icon: LayoutDashboard },
-  {
-    label: '实时监控',
-    icon: Activity,
-    children: [
-      { path: '/real-time/power-distribution', label: '配电监测', icon: Zap },
-      { path: '/real-time/transformer', label: '变压器监测', icon: Thermometer },
-      { path: '/real-time/classified', label: '分类能耗监测', icon: Droplets },
-      { path: '/real-time/query', label: '监测参数查询', icon: Database },
-      { path: '/real-time/offline', label: '离线事件', icon: Clock },
-    ],
-  },
-  {
-    label: '告警管理',
-    icon: Bell,
-    children: [
-      { path: '/alarm/equipment-fault', label: '设备故障', icon: AlertTriangle },
-      { path: '/alarm/energy-warning', label: '用能预警', icon: Activity },
-      { path: '/alarm/classification', label: '报警分级', icon: BarChart3 },
-      { path: '/alarm/analysis', label: '报警分析', icon: TrendingUp },
-      { path: '/alarm/sms-log', label: '短信日志', icon: Phone },
-    ],
-  },
-  {
-    label: '能耗统计',
-    icon: FileText,
-    children: [
-      { path: '/statistics/meter-reading', label: '集抄报表', icon: FileText },
-      { path: '/statistics/operation', label: '运行报表', icon: Activity },
-      { path: '/statistics/time-segment', label: '分时段报表', icon: Clock },
-      { path: '/statistics/supplement', label: '能耗数据补录', icon: Database },
-      { path: '/statistics/electric-fee', label: '电度电费', icon: Zap },
-      { path: '/statistics/power-factor', label: '力调电费', icon: Gauge },
-      { path: '/statistics/water-fee', label: '综合水费', icon: Droplets },
-    ],
-  },
-  {
-    label: '能耗分析',
-    icon: TrendingUp,
-    children: [
-      { path: '/analysis/flow', label: '能源流向图', icon: Activity },
-      { path: '/analysis/status', label: '能耗状态分析', icon: BarChart3 },
-      { path: '/analysis/yoy', label: '能耗同比分析', icon: TrendingUp },
-      { path: '/analysis/mom', label: '能耗环比分析', icon: TrendingUp },
-      { path: '/analysis/max-demand', label: '最大需量分析', icon: Gauge },
-      { path: '/analysis/loss', label: '损耗分析', icon: Activity },
-    ],
-  },
-  {
-    label: '系统管理',
-    icon: Settings,
-    children: [
-      { path: '/system/price', label: '用能价格管理', icon: BarChart3 },
-      { path: '/system/equipment', label: '设备管理', icon: Settings },
-      { path: '/system/communication', label: '通讯状态图', icon: Network },
-      { path: '/system/meter-status', label: '仪表通讯状态', icon: Gauge },
-      { path: '/system/gateway-status', label: '网关通讯状态', icon: Network },
-    ],
-  },
-];
+interface SidebarProps {
+  /** 移动端抽屉是否展开 */
+  open: boolean;
+  /** 桌面端是否收起为窄栏 */
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+  /** 选中菜单后回调，用于在移动端自动关闭抽屉 */
+  onNavigate: () => void;
+}
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+export default function Sidebar({ open, collapsed, onToggleCollapse, onNavigate }: SidebarProps) {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const logout = useStore((state) => state.logout);
+  const equipments = useStore((s) => s.equipments);
+  const alarms = useStore((s) => s.alarms);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const currentPath = location.pathname.replace(/\/+$/, '') || '/';
+  const isActive = (path: string) => currentPath === path.replace(/\/+$/, '');
+
+  // 进入页面时自动展开所在分组，避免「人在页面里但菜单是收起的」
+  useEffect(() => {
+    const hit = menuItems.find(
+      (item) => 'children' in item && item.children.some((c) => currentPath === c.path),
+    );
+    if (hit && 'children' in hit) setExpandedMenu(hit.label);
+  }, [currentPath]);
+
+  const go = (path: string) => {
+    navigate(path);
+    onNavigate();
   };
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const renderMenuItem = (item: { path: string; label: string; icon: typeof LayoutDashboard }) => (
-    <button
-      key={item.path}
-      onClick={() => navigate(item.path)}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-        isActive(item.path)
-          ? 'bg-blue-500 text-white'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-      }`}
-    >
-      <item.icon className="w-5 h-5" />
-      {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-    </button>
-  );
+  const onlineCount = equipments.filter((e) => e.status === 'active').length;
+  const pendingCount = alarms.filter((a) => a.status === 'pending').length;
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-all duration-300 z-40 ${
-        collapsed ? 'w-20' : 'w-64'
-      }`}
+      className={`fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-line bg-inset transition-transform duration-200 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0 ${collapsed ? 'w-56 lg:w-14' : 'w-56'}`}
     >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+      {/* 品牌区 */}
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-3">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-accent/50 bg-accent/10">
+          <Zap className="h-4 w-4 text-accent" />
+        </div>
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+          <div className="min-w-0 flex-1 leading-none">
+            <div className="truncate text-[13px] font-semibold tracking-tight text-ink">EMS 能源管理</div>
+            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-ink-3">
+              Control Console
             </div>
-            <span className="font-bold text-gray-900">EMS系统</span>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-        >
-          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-        </button>
+        {!collapsed && (
+          <button
+            onClick={onToggleCollapse}
+            title="收起导航"
+            aria-label="收起导航"
+            className="hidden h-6 w-6 items-center justify-center rounded-sm text-ink-3 transition-colors hover:bg-hover hover:text-ink lg:flex"
+          >
+            <ChevronsLeft className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
-      <nav className="p-4 space-y-2 overflow-y-auto h-[calc(100%-64px)]">
+      {/* 展开按钮（收起态） */}
+      {collapsed && (
+        <button
+          onClick={onToggleCollapse}
+          title="展开导航"
+          aria-label="展开导航"
+          className="mx-auto mt-2 hidden h-6 w-6 items-center justify-center rounded-sm text-ink-3 transition-colors hover:bg-hover hover:text-ink lg:flex"
+        >
+          <ChevronsRight className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {/* 菜单 */}
+      <nav className="scrollbar-thin flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-3">
         {menuItems.map((item) => {
           if ('children' in item) {
             const isExpanded = expandedMenu === item.label;
+            const hasActiveChild = item.children.some((c) => isActive(c.path));
+
+            if (collapsed) {
+              // 收起态：只显示分组图标，悬停浮出子菜单
+              return (
+                <div key={item.label} className="group relative">
+                  <button
+                    onClick={() => go(item.children[0].path)}
+                    title={item.label}
+                    className={`flex h-9 w-full items-center justify-center rounded-sm transition-colors ${
+                      hasActiveChild ? 'bg-accent/10 text-accent' : 'text-ink-3 hover:bg-hover hover:text-ink'
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                  </button>
+                  <div className="pointer-events-none absolute left-full top-0 z-50 ml-1 hidden min-w-[168px] group-hover:block">
+                    <div className="pointer-events-auto rounded border border-line bg-panel py-1 shadow-pop">
+                      <div className="px-3 py-1.5 text-[10px] uppercase tracking-widest text-ink-3">
+                        {item.label}
+                      </div>
+                      {item.children.map((child) => (
+                        <button
+                          key={child.path}
+                          onClick={() => go(child.path)}
+                          className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors ${
+                            isActive(child.path)
+                              ? 'bg-accent/10 text-accent'
+                              : 'text-ink-2 hover:bg-hover hover:text-ink'
+                          }`}
+                        >
+                          <child.icon className="h-3.5 w-3.5 shrink-0" />
+                          <span className="whitespace-nowrap">{child.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={item.label}>
                 <button
                   onClick={() => setExpandedMenu(isExpanded ? null : item.label)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    item.children.some((child) => isActive(child.path))
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:bg-gray-100'
+                  className={`flex h-8 w-full items-center gap-2.5 rounded-sm px-2.5 transition-colors ${
+                    hasActiveChild ? 'text-accent' : 'text-ink-2 hover:bg-hover hover:text-ink'
                   }`}
                 >
-                  <item.icon className="w-5 h-5" />
-                  {!collapsed && (
-                    <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
-                  )}
-                  {!collapsed && (
-                    <ChevronRight
-                      className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                    />
-                  )}
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 text-left text-[13px] font-medium">{item.label}</span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 shrink-0 transition-transform duration-150 ${
+                      isExpanded ? 'rotate-0' : '-rotate-90'
+                    }`}
+                  />
                 </button>
-                {isExpanded && !collapsed && (
-                  <div className="ml-4 mt-2 space-y-1">
-                    {item.children.map(renderMenuItem)}
-                  </div>
-                )}
-                {isExpanded && collapsed && (
-                  <div className="absolute left-20 top-0 bg-white border border-gray-200 rounded-lg shadow-lg p-2 space-y-1">
-                    {item.children.map((child) => (
-                      <button
-                        key={child.path}
-                        onClick={() => {
-                          navigate(child.path);
-                          setExpandedMenu(null);
-                        }}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm ${
-                          isActive(child.path)
-                            ? 'bg-blue-500 text-white'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        <child.icon className="w-4 h-4" />
-                        <span>{child.label}</span>
-                      </button>
-                    ))}
+
+                {isExpanded && (
+                  <div className="relative mt-0.5 space-y-0.5 pl-3">
+                    {/* 分组竖向引导线 */}
+                    <span className="absolute bottom-1 left-[15px] top-1 w-px bg-line" aria-hidden="true" />
+                    {item.children.map((child) => {
+                      const active = isActive(child.path);
+                      return (
+                        <button
+                          key={child.path}
+                          onClick={() => go(child.path)}
+                          className={`relative flex h-8 w-full items-center gap-2.5 rounded-sm pl-3 pr-2.5 text-left transition-colors ${
+                            active ? 'bg-accent/10 text-accent' : 'text-ink-2 hover:bg-hover hover:text-ink'
+                          }`}
+                        >
+                          {active && (
+                            <span
+                              className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-full bg-accent"
+                              aria-hidden="true"
+                            />
+                          )}
+                          <child.icon className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate text-[13px]">{child.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             );
           }
-          return renderMenuItem(item);
-        })}
 
-        <div className="mt-auto pt-4 border-t border-gray-200">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-red-500 transition-all"
-          >
-            <LogOut className="w-5 h-5" />
-            {!collapsed && <span className="text-sm font-medium">退出登录</span>}
-          </button>
-        </div>
+          const active = isActive(item.path);
+          if (collapsed) {
+            return (
+              <button
+                key={item.path}
+                onClick={() => go(item.path)}
+                title={item.label}
+                className={`flex h-9 w-full items-center justify-center rounded-sm transition-colors ${
+                  active ? 'bg-accent/10 text-accent' : 'text-ink-3 hover:bg-hover hover:text-ink'
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+              </button>
+            );
+          }
+
+          return (
+            <button
+              key={item.path}
+              onClick={() => go(item.path)}
+              className={`relative flex h-8 w-full items-center gap-2.5 rounded-sm px-2.5 transition-colors ${
+                active ? 'bg-accent/10 text-accent' : 'text-ink-2 hover:bg-hover hover:text-ink'
+              }`}
+            >
+              {active && (
+                <span
+                  className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-full bg-accent"
+                  aria-hidden="true"
+                />
+              )}
+              <item.icon className="h-4 w-4 shrink-0" />
+              <span className="text-[13px] font-medium">{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
+
+      {/* 底部：系统实时状态 */}
+      <div className="shrink-0 border-t border-line p-3">
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-2">
+            <span className={`status-dot ${pendingCount > 0 ? 'status-danger animate-led' : 'status-online'}`} />
+            <Cpu className="h-4 w-4 text-ink-3" />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[12px]">
+              <span className="flex items-center gap-2 text-ink-3">
+                <span className="status-dot status-online animate-pulse-soft" />
+                在线设备
+              </span>
+              <span className="font-mono font-medium text-ink">
+                {onlineCount}
+                <span className="text-ink-3">/{equipments.length}</span>
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[12px]">
+              <span className="flex items-center gap-2 text-ink-3">
+                <span className={`status-dot ${pendingCount > 0 ? 'status-danger animate-led' : 'status-online'}`} />
+                待处理告警
+              </span>
+              <span className={`font-mono font-medium ${pendingCount > 0 ? 'text-danger' : 'text-ink'}`}>
+                {pendingCount}
+              </span>
+            </div>
+            <div className="border-t border-line pt-2 font-mono text-[10px] uppercase tracking-widest text-ink-3">
+              v1.0.0 · Build 2026.10
+            </div>
+          </div>
+        )}
+      </div>
     </aside>
   );
 }

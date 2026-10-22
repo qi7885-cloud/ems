@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,7 +9,14 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { TrendingUp, Calendar, Filter } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+import { getTimeLabels, periodConfig, seededSeries } from '../data/mockData';
+import type { PeriodKey } from '../data/mockData';
+import { useStore } from '../store/useStore';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import { useChartTheme, axisStyle, tooltipStyle, legendStyle } from '../hooks/useChartTheme';
 
 ChartJS.register(
   CategoryScale,
@@ -20,60 +27,90 @@ ChartJS.register(
   Legend
 );
 
-export default function AlarmAnalysis() {
-  const [timeRange, setTimeRange] = useState('week');
+// 只维护各类型的 count，percentage 完全由 count / 总数 派生，避免两者对不上
+const alarmTypeCounts = [
+  { type: '设备故障', count: 125 },
+  { type: '参数越限', count: 98 },
+  { type: '通讯异常', count: 72 },
+  { type: '用能预警', count: 56 },
+  { type: '维护提醒', count: 25 },
+  { type: '其他', count: 10 },
+];
 
-  const chartData = {
-    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-    datasets: [
-      {
-        label: '严重',
-        data: [5, 3, 7, 4, 6, 2, 4],
-        backgroundColor: 'rgba(239, 68, 68, 0.8)',
-        borderRadius: 6,
-      },
-      {
-        label: '一般',
-        data: [12, 15, 10, 18, 14, 8, 11],
-        backgroundColor: 'rgba(234, 179, 8, 0.8)',
-        borderRadius: 6,
-      },
-      {
-        label: '轻微',
-        data: [25, 30, 28, 22, 35, 18, 24],
-        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-        borderRadius: 6,
-      },
-    ],
-  };
+export default function AlarmAnalysis() {
+  const [timeRange, setTimeRange] = useState<PeriodKey>('week');
+  const alarms = useStore((state) => state.alarms);
+  const ct = useChartTheme();
+  const axis = axisStyle(ct);
+
+  const pendingCount = alarms.filter((alert) => alert.status === 'pending').length;
+
+  // 趋势数据随所选周期派生：点数、X 轴标签、数据都在变，切换周期图形必然变化
+  const chartData = useMemo(() => {
+    const points = periodConfig[timeRange].points;
+    return {
+      labels: getTimeLabels(timeRange),
+      datasets: [
+        {
+          label: '严重',
+          data: seededSeries(`alarm-severe-${timeRange}`, points, 1, 8),
+          backgroundColor: ct.danger,
+          borderRadius: 2,
+        },
+        {
+          label: '一般',
+          data: seededSeries(`alarm-general-${timeRange}`, points, 6, 20),
+          backgroundColor: ct.warn,
+          borderRadius: 2,
+        },
+        {
+          label: '轻微',
+          data: seededSeries(`alarm-minor-${timeRange}`, points, 12, 36),
+          backgroundColor: ct.info,
+          borderRadius: 2,
+        },
+      ],
+    };
+  }, [timeRange, ct]);
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top' as const,
-      },
+      legend: legendStyle(ct, 'top'),
+      tooltip: tooltipStyle(ct),
     },
     scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
-      },
+      x: { ...axis, grid: { display: false } },
+      y: { ...axis },
     },
   };
 
+  // 涨跌语义：isImprovement 显式声明「这个变化是否代表变好」，颜色只依赖它。
+  // MetricStrip 的 up 同时决定箭头与颜色（up=true → 红 + 向上），
+  // 本页各指标的改善方向恰好与「下降」一致，故 up = !isImprovement：
+  //   平均响应时间下降 = 改善 → up=false（绿 + 向下箭头）
+  //   重复告警率上升 = 恶化 → up=true（红 + 向上箭头）
   const statistics = [
-    { label: '本月告警总数', value: 386, change: '+12%', trend: 'up' },
-    { label: '处理完成率', value: '94%', change: '+3%', trend: 'up' },
-    { label: '平均响应时间', value: '28分钟', change: '-15%', trend: 'down' },
-    { label: '重复告警率', value: '8%', change: '+2%', trend: 'up' },
+    { label: '告警总数', value: 386, unit: '条', change: '+12%', isImprovement: false },
+    { label: '待处理', value: pendingCount, unit: '条', change: '', isImprovement: true },
+    { label: '平均响应时间', value: '28', unit: '分钟', change: '-15%', isImprovement: true },
+    { label: '重复告警率', value: '8', unit: '%', change: '+2%', isImprovement: false },
   ];
+
+  // 百分比由 count / 总数 派生；最后一项取「100 - 前面已取整之和」兜底，保证加和恰好 100%
+  const alarmTypeDistribution = useMemo(() => {
+    const total = alarmTypeCounts.reduce((sum, item) => sum + item.count, 0);
+    let acc = 0;
+    return alarmTypeCounts.map((item, index) => {
+      if (index === alarmTypeCounts.length - 1) {
+        return { ...item, percentage: 100 - acc };
+      }
+      const percentage = Math.round((item.count / total) * 100);
+      acc += percentage;
+      return { ...item, percentage };
+    });
+  }, []);
 
   const topDevices = [
     { name: '变压器A', count: 45, type: '温度过高' },
@@ -83,99 +120,92 @@ export default function AlarmAnalysis() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">报警分析</h1>
-          <p className="text-gray-500 mt-1">分析报警趋势和统计数据</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-gray-500" />
+    <div className="space-y-3">
+      <PageHeader title="报警分析" description="分析报警趋势和统计数据">
+        <span className="flex items-center gap-1.5 text-ink-3">
+          <Calendar className="h-3.5 w-3.5" />
           <select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setTimeRange(e.target.value as PeriodKey)}
+            className="field h-7"
           >
             <option value="week">本周</option>
             <option value="month">本月</option>
             <option value="quarter">本季度</option>
             <option value="year">本年</option>
           </select>
-        </div>
-      </div>
+        </span>
+      </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {statistics.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <p className="text-sm text-gray-500">{stat.label}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-3xl font-bold text-gray-900">{stat.value}</span>
-              <span className={`inline-flex items-center text-sm font-medium ${
-                stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                <TrendingUp className={`w-4 h-4 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />
-                {stat.change}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <MetricStrip
+        cols={4}
+        items={statistics.map((stat) => ({
+          label: stat.label,
+          value: stat.value,
+          unit: stat.unit,
+          trend: stat.change || undefined,
+          up: !stat.isImprovement,
+          tone: stat.label === '待处理' ? (pendingCount > 0 ? 'warn' : 'ok') : 'default',
+        }))}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">告警趋势分析</h2>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <Panel title="告警趋势分析" className="lg:col-span-2" aside={<span>单位 条</span>}>
           <div className="h-64">
             <Bar data={chartData} options={chartOptions} />
           </div>
-        </div>
+        </Panel>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">告警设备排行</h2>
-          <div className="space-y-4">
+        <Panel title="告警设备排行">
+          <div className="space-y-3">
             {topDevices.map((device, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold ${
-                  index === 0 ? 'bg-red-500' :
-                  index === 1 ? 'bg-yellow-500' :
-                  index === 2 ? 'bg-blue-500' : 'bg-gray-500'
-                }`}>
+              <div key={device.name} className="flex items-center gap-3">
+                <div
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sm font-mono text-[12px] font-bold ${
+                    index === 0
+                      ? 'bg-danger text-canvas'
+                      : index === 1
+                        ? 'bg-warn text-canvas'
+                        : index === 2
+                          ? 'bg-accent text-canvas'
+                          : 'bg-panel-2 text-ink-2'
+                  }`}
+                >
                   {index + 1}
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{device.name}</p>
-                  <p className="text-sm text-gray-500">{device.type}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-ink">{device.name}</p>
+                  <p className="text-[12px] text-ink-3">{device.type}</p>
                 </div>
-                <span className="text-lg font-bold text-gray-900">{device.count}</span>
+                <span className="font-mono text-[15px] font-semibold text-ink">{device.count}</span>
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">告警类型分布</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {[
-            { type: '设备故障', count: 125, percentage: 32 },
-            { type: '参数越限', count: 98, percentage: 25 },
-            { type: '通讯异常', count: 72, percentage: 19 },
-            { type: '用能预警', count: 56, percentage: 14 },
-            { type: '维护提醒', count: 25, percentage: 6 },
-            { type: '其他', count: 10, percentage: 4 },
-          ].map((item, index) => (
-            <div key={index} className="p-4 bg-gray-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-gray-900">{item.count}</p>
-              <p className="text-sm text-gray-600 mt-1">{item.type}</p>
-              <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+      <Panel title="告警类型分布" aside={<span>共 {alarmTypeCounts.reduce((s, i) => s + i.count, 0)} 条</span>}>
+        <div className="space-y-2.5">
+          {alarmTypeDistribution.map((item, index) => (
+            <div key={item.type} className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-[12px] text-ink-2">{item.type}</span>
+              <div className="progress-bar flex-1">
                 <div
-                  className="h-full bg-blue-500 rounded-full"
-                  style={{ width: `${item.percentage}%` }}
+                  className="progress-fill"
+                  style={{
+                    width: `${item.percentage}%`,
+                    backgroundColor: ct.series[index % ct.series.length],
+                  }}
                 />
               </div>
+              <span className="w-10 shrink-0 text-right font-mono text-[12px] text-ink">{item.count}</span>
+              <span className="w-11 shrink-0 text-right font-mono text-[12px] text-ink-3">
+                {item.percentage}%
+              </span>
             </div>
           ))}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

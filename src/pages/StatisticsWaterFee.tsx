@@ -1,139 +1,240 @@
+import { useMemo } from 'react';
 import { Droplets, DollarSign, TrendingUp, CloudRain } from 'lucide-react';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { waterPricePlans } from '../data/mockData';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import { useChartTheme, axisStyle, tooltipStyle, legendStyle } from '../hooks/useChartTheme';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+
+/** 各月用水量（吨），费用全部由 waterPricePlans 单价派生 */
+const monthlyUsage = [
+  { month: '1月', usage: 24000 },
+  { month: '2月', usage: 22000 },
+  { month: '3月', usage: 26000 },
+  { month: '4月', usage: 28000 },
+  { month: '5月', usage: 30000 },
+  { month: '6月', usage: 32000 },
+];
+
+/** 三类水费单价，单一数据源；综合单价 = 三项单价之和，合计 = 三项费用之和 */
+const unitPriceRows = [
+  { key: 'tap', label: waterPricePlans.tap.label, price: waterPricePlans.tap.price },
+  { key: 'sewage', label: waterPricePlans.sewage.label, price: waterPricePlans.sewage.price },
+  { key: 'resource', label: waterPricePlans.resource.label, price: waterPricePlans.resource.price },
+] as const;
+
+const RING_RADIUS = 40;
+const CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const formatMoney = (value: number) => `¥${Math.round(value).toLocaleString('zh-CN')}`;
+const formatPrice = (value: number) =>
+  value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function StatisticsWaterFee() {
-  const waterData = [
-    { month: '1月', usage: 24000, fee: 108000, sewage: 28800, total: 136800 },
-    { month: '2月', usage: 22000, fee: 99000, sewage: 26400, total: 125400 },
-    { month: '3月', usage: 26000, fee: 117000, sewage: 31200, total: 148200 },
-    { month: '4月', usage: 28000, fee: 126000, sewage: 33600, total: 159600 },
-    { month: '5月', usage: 30000, fee: 135000, sewage: 36000, total: 171000 },
-    { month: '6月', usage: 32000, fee: 144000, sewage: 38400, total: 182400 },
+  const ct = useChartTheme();
+  const axis = axisStyle(ct);
+
+  const waterRows = useMemo(
+    () =>
+      monthlyUsage.map(({ month, usage }) => {
+        const tap = usage * waterPricePlans.tap.price;
+        const sewage = usage * waterPricePlans.sewage.price;
+        const resource = usage * waterPricePlans.resource.price;
+        return { month, usage, tap, sewage, resource, total: tap + sewage + resource };
+      }),
+    [],
+  );
+
+  const latest = waterRows[waterRows.length - 1];
+
+  const unitPriceTotal = unitPriceRows.reduce((sum, item) => sum + item.price, 0);
+
+  const ring = useMemo(() => {
+    const values = unitPriceRows.map((item, index) => ({
+      ...item,
+      index,
+      amount: latest[item.key as 'tap' | 'sewage' | 'resource'],
+    }));
+    const total = values.reduce((sum, item) => sum + item.amount, 0);
+
+    let roundedPercentage = 0;
+    let drawnLength = 0;
+    const segments = values.map((item, index) => {
+      const ratio = total > 0 ? item.amount / total : 0;
+      // 占比取整兜底：最后一项用 100 减去已累计值，保证占比之和为 100%
+      const percentage =
+        index === values.length - 1 ? 100 - roundedPercentage : Math.round(ratio * 100);
+      roundedPercentage += percentage;
+
+      const length = ratio * CIRCUMFERENCE;
+      const segment = {
+        ...item,
+        percentage,
+        dasharray: `${length} ${CIRCUMFERENCE - length}`,
+        dashoffset: -drawnLength,
+      };
+      drawnLength += length;
+      return segment;
+    });
+
+    return { segments, total };
+  }, [latest]);
+
+  const trendData = {
+    labels: waterRows.map((row) => row.month),
+    datasets: [
+      {
+        label: unitPriceRows[0].label,
+        data: waterRows.map((row) => row.tap),
+        backgroundColor: ct.series[0],
+        hoverBackgroundColor: ct.series[0],
+        stack: 'water',
+        borderRadius: 2,
+        borderSkipped: false as const,
+      },
+      {
+        label: unitPriceRows[1].label,
+        data: waterRows.map((row) => row.sewage),
+        backgroundColor: ct.series[1],
+        hoverBackgroundColor: ct.series[1],
+        stack: 'water',
+        borderRadius: 2,
+        borderSkipped: false as const,
+      },
+      {
+        label: unitPriceRows[2].label,
+        data: waterRows.map((row) => row.resource),
+        backgroundColor: ct.series[2],
+        hoverBackgroundColor: ct.series[2],
+        stack: 'water',
+        borderRadius: 2,
+        borderSkipped: false as const,
+      },
+    ],
+  };
+
+  const trendOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index' as const, intersect: false },
+    plugins: { legend: legendStyle(ct, 'bottom'), tooltip: tooltipStyle(ct) },
+    scales: {
+      x: { ...axis, stacked: true, grid: { display: false } },
+      y: {
+        ...axis,
+        stacked: true,
+        title: { display: true, text: '元', color: ct.tick, font: { size: 11 } },
+        ticks: { ...axis.ticks, callback: (value: number | string) => `¥${Number(value).toLocaleString('zh-CN')}` },
+      },
+    },
+  };
+
+  const metrics = [
+    { label: '本月用水量', value: latest.usage, unit: '吨', icon: Droplets, tone: 'accent' as const },
+    { label: '自来水费', value: formatMoney(latest.tap), icon: DollarSign },
+    { label: '排污费', value: formatMoney(latest.sewage), icon: CloudRain },
+    { label: '水资源费', value: formatMoney(latest.resource), icon: Droplets },
+    { label: '合计费用', value: formatMoney(latest.total), note: '本月用水量 × 综合单价', icon: TrendingUp, tone: 'ok' as const },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">综合水费</h1>
-        <p className="text-gray-500 mt-1">统计分析水费和排污费支出情况</p>
-      </div>
+    <div className="space-y-3">
+      <PageHeader title="综合水费" description="统计分析自来水费、排污费和水资源费支出情况" />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
-              <Droplets className="w-6 h-6 text-cyan-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">本月用水量</p>
-              <p className="text-2xl font-bold text-gray-900">32,000 吨</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">水费</p>
-              <p className="text-2xl font-bold text-gray-900">¥144,000</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <CloudRain className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">排污费</p>
-              <p className="text-2xl font-bold text-gray-900">¥38,400</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">合计费用</p>
-              <p className="text-2xl font-bold text-gray-900">¥182,400</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MetricStrip cols={5} items={metrics} />
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">月度水费趋势</h2>
-        <div className="h-64 flex items-end justify-between gap-4">
-          {waterData.map((item, index) => (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div className="w-full flex gap-1">
-                <div
-                  className="flex-1 bg-blue-500 rounded-t"
-                  style={{ height: `${(item.fee / 150000) * 200}px` }}
-                />
-                <div
-                  className="flex-1 bg-green-500 rounded-t"
-                  style={{ height: `${(item.sewage / 40000) * 200}px` }}
-                />
-              </div>
-              <span className="text-xs text-gray-500 mt-2">{item.month}</span>
-            </div>
-          ))}
+      <Panel title="月度水费趋势" description="堆叠柱：三类水费逐月构成" aside={<span className="font-mono text-[11px]">单位 元</span>} flush>
+        <div className="h-[260px] p-3">
+          <Bar data={trendData} options={trendOptions} />
         </div>
-        <div className="flex items-center justify-center gap-6 mt-4">
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 bg-blue-500 rounded" />
-            <span className="text-sm text-gray-600">水费</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 bg-green-500 rounded" />
-            <span className="text-sm text-gray-600">排污费</span>
-          </div>
-        </div>
-      </div>
+      </Panel>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">费用构成分析</h2>
-          <div className="flex items-center justify-center h-48">
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="12" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="12" strokeDasharray={`${79 * 2.51} 251`} />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="12" strokeDasharray={`${21 * 2.51} 251`} strokeDashoffset={`-${79 * 2.51}`} />
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <Panel title="费用构成分析">
+          <div className="flex items-center justify-center">
+            <div className="relative h-48 w-48">
+              <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
+                <circle className="stroke-line" cx="50" cy="50" r="40" fill="none" strokeWidth="12" />
+                {ring.segments.map((segment) => (
+                  <circle
+                    key={segment.key}
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={ct.series[segment.index]}
+                    strokeWidth="12"
+                    strokeDasharray={segment.dasharray}
+                    strokeDashoffset={segment.dashoffset}
+                  />
+                ))}
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-gray-900">¥182K</span>
-                <span className="text-sm text-gray-500">本月合计</span>
+                <span className="font-mono text-[22px] font-semibold text-ink">{formatMoney(ring.total)}</span>
+                <span className="text-2xs text-ink-3">本月合计</span>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">单价明细</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <span className="text-gray-600">自来水费</span>
-              <span className="font-bold text-blue-700">¥4.50 / 吨</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <span className="text-gray-600">排污费</span>
-              <span className="font-bold text-green-700">¥1.20 / 吨</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg">
-              <span className="text-gray-600">水资源费</span>
-              <span className="font-bold text-cyan-700">¥0.80 / 吨</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-t border-gray-200 mt-2">
-              <span className="font-bold text-gray-900">综合单价</span>
-              <span className="text-xl font-bold text-gray-900">¥6.50 / 吨</span>
-            </div>
+          <div className="mt-3 space-y-2">
+            {ring.segments.map((segment) => (
+              <div key={segment.key} className="flex items-center gap-2">
+                <span
+                  className="h-3 w-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: ct.series[segment.index] }}
+                />
+                <span className="flex-1 truncate text-[12px] text-ink-2">{segment.label}</span>
+                <span className="font-mono text-[12px] text-ink-3">{formatMoney(segment.amount)}</span>
+                <span className="w-10 text-right font-mono text-[12px] text-ink">{segment.percentage}%</span>
+              </div>
+            ))}
           </div>
-        </div>
+        </Panel>
+
+        <Panel
+          title="单价与费用明细"
+          aside={<span className="font-mono text-[11px]">本月 {latest.usage.toLocaleString('zh-CN')} 吨</span>}
+          flush
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>项目</th>
+                <th className="text-right">单价（元/吨）</th>
+                <th className="text-right">金额（元）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="text-ink-2">{unitPriceRows[0].label}</td>
+                <td className="text-right font-mono text-ink-2">{formatPrice(unitPriceRows[0].price)}</td>
+                <td className="text-right font-mono">{formatMoney(latest.tap)}</td>
+              </tr>
+              <tr>
+                <td className="text-ink-2">{unitPriceRows[1].label}</td>
+                <td className="text-right font-mono text-ink-2">{formatPrice(unitPriceRows[1].price)}</td>
+                <td className="text-right font-mono">{formatMoney(latest.sewage)}</td>
+              </tr>
+              <tr>
+                <td className="text-ink-2">{unitPriceRows[2].label}</td>
+                <td className="text-right font-mono text-ink-2">{formatPrice(unitPriceRows[2].price)}</td>
+                <td className="text-right font-mono">{formatMoney(latest.resource)}</td>
+              </tr>
+              <tr>
+                <td className="border-t border-line-strong bg-inset font-semibold text-ink">综合单价 / 本月合计</td>
+                <td className="border-t border-line-strong bg-inset text-right font-mono font-semibold text-ink">
+                  {formatPrice(unitPriceTotal)}
+                </td>
+                <td className="border-t border-line-strong bg-inset text-right font-mono font-semibold text-ink">
+                  {formatMoney(latest.total)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Panel>
       </div>
     </div>
   );

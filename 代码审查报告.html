@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMS 能源管理系统 · 代码审查报告</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f6f7f9;
+    color: #1f2937;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 28px 80px; }
+
+  header { margin-bottom: 40px; }
+  .eyebrow { font-size: 13px; letter-spacing: .12em; color: #2563eb; font-weight: 700; text-transform: uppercase; }
+  h1 { font-size: 32px; margin: 8px 0 10px; letter-spacing: -.02em; }
+  .sub { color: #6b7280; font-size: 15px; }
+  .meta { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: #fff; border: 1px solid #e5e7eb; border-radius: 999px; padding: 5px 13px; font-size: 13px; color: #4b5563; }
+  .chip b { color: #111827; }
+
+  /* 概览卡片 */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 32px 0 44px; }
+  .stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px 18px; }
+  .stat .n { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+  .stat .l { font-size: 13px; color: #6b7280; margin-top: 6px; }
+  .n-red { color: #dc2626; } .n-amber { color: #d97706; } .n-blue { color: #2563eb; } .n-gray { color: #6b7280; }
+
+  /* 结论条 */
+  .verdict { background: #fff; border: 1px solid #e5e7eb; border-left: 5px solid #dc2626; border-radius: 12px; padding: 22px 26px; margin-bottom: 44px; }
+  .verdict h2 { margin: 0 0 10px; font-size: 17px; color: #b91c1c; }
+  .verdict p { margin: 0; color: #374151; font-size: 15px; }
+  .verdict code { background: #f3f4f6; padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+
+  h2.sec { font-size: 21px; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sec-desc { color: #6b7280; font-size: 14px; margin: 0 0 20px; }
+  section { margin-bottom: 46px; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; letter-spacing: .04em; }
+  .b0 { background: #fee2e2; color: #b91c1c; }
+  .b1 { background: #ffedd5; color: #c2410c; }
+  .b2 { background: #e0e7ff; color: #3730a3; }
+  .b3 { background: #f3f4f6; color: #4b5563; }
+
+  .item { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
+  .item-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .item-head .idx { font-weight: 700; color: #9ca3af; font-size: 14px; min-width: 22px; padding-top: 1px; }
+  .item-title { font-size: 16px; font-weight: 650; flex: 1; }
+  .loc { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px 34px; }
+  .loc code { background: #f9fafb; border: 1px solid #e5e7eb; color: #4b5563; padding: 2px 8px; border-radius: 6px; font-size: 12.5px; font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+  .item p { margin: 0 0 10px 34px; font-size: 14.5px; color: #374151; }
+  .item p:last-child { margin-bottom: 0; }
+  pre { margin: 0 0 10px 34px; background: #1e293b; color: #e2e8f0; border-radius: 9px; padding: 13px 16px; font-size: 12.8px; overflow-x: auto; font-family: ui-monospace, "SF Mono", Consolas, monospace; line-height: 1.6; }
+  pre .bad { color: #fca5a5; }
+  pre .good { color: #86efac; }
+  pre .cmt { color: #94a3b8; }
+  .fix { margin-left: 34px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px; padding: 11px 15px; font-size: 14px; color: #166534; }
+  .fix b { color: #14532d; }
+
+  ul.plain { margin: 0 0 0 34px; padding-left: 18px; font-size: 14.5px; color: #374151; }
+  ul.plain li { margin-bottom: 7px; }
+  ul.plain code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; font-size: 14px; }
+  th { background: #f9fafb; text-align: left; padding: 12px 16px; font-weight: 650; color: #374151; border-bottom: 1px solid #e5e7eb; font-size: 13.5px; }
+  td { padding: 11px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: #f9fafb; padding: 1px 5px; border-radius: 4px; }
+
+  footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Code Review</div>
+  <h1>EMS 能源管理系统 · 代码审查报告</h1>
+  <p class="sub">覆盖 <b>src/</b> 下全部 42 个文件（约 6,050 行），含 TypeScript 类型检查、ESLint、生产构建验证与逐文件人工审查。</p>
+  <div class="meta">
+    <span class="chip">技术栈 <b>Vite 6 + React 18 + TS</b></span>
+    <span class="chip">文件 <b>34 tsx / 6 ts / 1 css</b></span>
+    <span class="chip">审查日期 <b>2026-10-09</b></span>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="n n-red">1</div><div class="l">阻塞级（构建失败）</div></div>
+  <div class="stat"><div class="n n-amber">7</div><div class="l">功能级缺陷</div></div>
+  <div class="stat"><div class="n n-blue">22</div><div class="l">一致性 / 体验问题</div></div>
+  <div class="stat"><div class="n n-gray">18</div><div class="l">ESLint 未使用变量</div></div>
+</div>
+
+<div class="verdict">
+  <h2>⚠️ 首要结论：当前项目 <code>npm run build</code> 无法通过</h2>
+  <p>
+    <code>package.json</code> 的构建脚本是 <code>tsc -b &amp;&amp; vite build</code>，而 <code>src/pages/Dashboard.tsx</code> 有 <b>3 处 TypeScript 类型错误</b>，<code>tsc</code> 退出码为 <b>1</b>，导致整条构建链中断。<br>
+    已单独验证：<code>vite build</code>（跳过类型检查）可以成功产出，输出单文件 <b>1,272 KB（gzip 223 KB）</b>，无代码分割。所以「本地 dev 能跑、打包发布失败」是当前最直接的卡点。
+  </p>
+</div>
+
+<!-- ===================== P0 ===================== -->
+<section>
+  <h2 class="sec">P0 · 阻塞构建</h2>
+  <p class="sec-desc">必须修复，否则无法产出生产包。</p>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">1</span><span class="item-title">Chart.js 字体粗细传了字符串，类型不匹配</span><span class="badge b0">P0</span></div>
+    <div class="loc"><code>src/pages/Dashboard.tsx:99</code><code>:174</code><code>:229</code></div>
+    <p>三处图表的 tooltip 配置里写了 <code>weight: '600'</code>。Chart.js v4 的 <code>FontSpec.weight</code> 类型为 <code>number | 'bold' | 'normal' | 'lighter' | 'bolder'</code>，字符串 <code>'600'</code> 不属于该联合类型，因此 tsc 报 TS2322。</p>
+    <pre><span class="bad">- titleFont: { size: 13, weight: '600' },</span>
+<span class="good">+ titleFont: { size: 13, weight: 600 },</span>
+<span class="cmt">// 注意：同一文件 ticks 里的 weight: 500 是数字，没问题；</span>
+<span class="cmt">// 只有这三处 titleFont 被加了引号。</span></pre>
+    <div class="fix"><b>修复：</b>去掉三个引号，改为数字 <code>600</code>（或直接用 <code>'bold'</code>）。改动 3 个字符即可解开构建。</div>
+  </div>
+</section>
+
+<!-- ===================== P1 ===================== -->
+<section>
+  <h2 class="sec">P1 · 功能性缺陷</h2>
+  <p class="sec-desc">页面能打开，但核心功能失效或数据自相矛盾。</p>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">2</span><span class="item-title">电费明细合计与页面显示对不上，差 2.85 万元</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/pages/StatisticsElectricFee.tsx:113-131</code><code>:98</code></div>
+    <p>明细各行相乘结果没错，但加总后与「合计」严重不符：</p>
+    <pre><span class="cmt">基本电费                2,000</span>
+尖峰 15,000 × 0.85 =  12,750
+高峰 25,000 × 0.67 =  16,750
+平段 20,000 × 0.52 =  10,400
+低谷 12,000 × 0.30 =   3,600
+<span class="bad">五项相加         =  45,500</span>
+<span class="bad">页面「合计」      =  74,000   ← 差 28,500</span>
+<span class="bad">环形图中心        =  ¥74K</span></pre>
+    <p style="margin-left:34px;font-size:13.5px;color:#6b7280;">勘误：本报告初版此处误记为「47,500 / 差 26,500」，实际四项电量电费为 43,500，加上基本电费 2,000 后为 <b>45,500</b>。</p>
+    <div class="fix"><b>修复：</b>先把口径定死——「合计」到底含不含基本电费、有没有力调/附加费；然后要么改数字、要么改成由明细数组 <code>reduce</code> 算出来，避免手写常量漂移。顺带把环形图的 <code>strokeDasharray</code>（现在是写死的 3% / 97% 两段）改为按各费用项占比计算。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">3</span><span class="item-title">在渲染过程中调用 Math.random()，柱子每帧都在抖</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/pages/StatisticsOperation.tsx:102</code><code>src/pages/Transformer.tsx:148-158</code></div>
+    <p>柱状图高度直接在 JSX 里算随机数，任何一次重渲染（切 tab、父组件更新、StrictMode 双渲染）都会重新抽签，图形随机跳动。</p>
+    <pre><span class="bad">style={{ height: `${30 + Math.sin(i * 0.5) * 30 + Math.random() * 20}px` }}</span>
+
+<span class="cmt">// Transformer.tsx 同上，且问题更重：</span>
+<span class="bad">const height = 20 + Math.sin(i * 0.5) * 15 + Math.random() * 10;</span>
+<span class="cmt">// 这个高度只由 sin + random 决定，跟所选变压器的 temperature 毫无关系，</span>
+<span class="cmt">// 上限恒为 45px < 50px，颜色判断也永远命中不到红色分支。</span></pre>
+    <div class="fix"><b>修复：</b>把随机数据抽到 <code>useMemo</code> 里只算一次，或直接写进 <code>mockData.ts</code> 作为静态序列。<code>Transformer</code> 的温度曲线应以 <code>transformer.temperature</code> 为基准做上下浮动，颜色按该设备实际温度判定。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">4</span><span class="item-title">监测参数查询：3 个筛选条件里 2 个是摆设</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/pages/ParameterQuery.tsx:6-8</code><code>:21-24</code><code>:38-47</code><code>:53-71</code></div>
+    <p>页面有「设备选择 / 开始日期 / 结束日期 / 关键字」四组控件，但过滤函数只读了 <code>searchTerm</code>：</p>
+    <pre>const filteredParameters = mockParameters.filter((param) =&gt;
+  param.equipment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  param.parameter.toLowerCase().includes(searchTerm.toLowerCase())
+);
+<span class="cmt">// selectedEquipment、startDate、endDate 三个 state 完全没被引用</span></pre>
+    <p>用户选了「变压器A」或改了日期区间，列表纹丝不动。另外「查询 / 刷新 / 筛选 / 导出」四个按钮都没有 <code>onClick</code>。</p>
+    <div class="fix"><b>修复：</b>把三个条件并入 filter 回调（设备做精确匹配、日期做区间比较），查询按钮通过受控触发而非实时过滤；导出可先做 <code>CSV</code> 拼接下载。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">5</span><span class="item-title">用能预警：阈值配置改不了、也存不下</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/pages/EnergyWarning.tsx:102-105</code><code>:128-137</code><code>:143-150</code></div>
+    <p>「保存配置」按钮没有 <code>onClick</code>。四个阈值滑块用的是 <code>defaultValue</code>（非受控）且没有 <code>onChange</code>，拖动后右侧数字标签仍显示初始值 <code>{threshold.warning}</code>，用户看不到任何反馈。</p>
+    <div class="fix"><b>修复：</b>给 slider 加 <code>onChange</code> 写回受控 state（或用 <code>onInput</code> 同步显示），保存按钮接入 store 或至少给出 toast 反馈。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">6</span><span class="item-title">登录态不持久化，刷新页面即被踢回登录页</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/store/useStore.ts:19-24</code><code>src/routes.tsx:34-40</code></div>
+    <p><code>isLoggedIn</code> 初始值写死为 <code>false</code>，store 未接入 <code>persist</code> 中间件，也没有写 sessionStorage。凡是刷新页面、或直接在地址栏输入内页路径，<code>ProtectedRoute</code> 都会判定未登录并 <code>&lt;Navigate to="/login" /&gt;</code>。</p>
+    <div class="fix"><b>修复：</b>用 <code>zustand/middleware</code> 的 <code>persist</code> 包一层，把 <code>user</code>/<code>isLoggedIn</code> 存 sessionStorage。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">7</span><span class="item-title">综合看板读的是原始 mock，不随告警处理更新</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/pages/Dashboard.tsx:1-2</code><code>:45</code></div>
+    <p>看板直接 <code>import { mockAlarms }</code> 后本地 filter，而不是读 store：</p>
+    <pre><span class="bad">import { mockAlarms, ... } from '../data/mockData';</span>
+<span class="bad">const pendingAlarms = mockAlarms.filter((a) =&gt; a.status === 'pending');</span>
+
+<span class="good">const alarms = useStore((s) =&gt; s.alarms);   // 应与 EquipmentFault 同源</span>
+<span class="good">const pendingAlarms = alarms.filter((a) =&gt; a.status === 'pending');</span></pre>
+    <p>结果：在「设备故障」页把告警点掉之后，「待处理告警」数字和列表都不变，两页数据长期打架。</p>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">8</span><span class="item-title">价格管理页的新增 / 编辑 / 删除全是空壳</span><span class="badge b1">P1</span></div>
+    <div class="loc"><code>src/pages/SystemPrice.tsx:63-66</code><code>:149-154</code><code>:18-27</code></div>
+    <p><code>handleSubmit</code> 只关弹窗、不写任何数据；删除按钮连 <code>onClick</code> 都没有；<code>priceData</code> 是组件内的 <code>const</code> 数组，本身也不可变更。同理 <code>StatisticsSupplement.tsx</code> 的「新增补录」提交后同样不落数据。</p>
+    <div class="fix"><b>修复：</b>要么把这两页的数据提升到 store 并补齐 CRUD（参考已实现完整的 <code>EquipmentManagement.tsx</code>），要么在按钮上明确标注「演示占位」避免误解。</div>
+  </div>
+</section>
+
+<!-- ===================== P2 ===================== -->
+<section>
+  <h2 class="sec">P2 · 一致性、逻辑与体验问题</h2>
+  <p class="sec-desc">不影响打开页面，但会造成数据误导或交互失效。</p>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">9</span><span class="item-title">路由重复：两个菜单指向同一个页面</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/routes.tsx:163-174</code><code>src/components/Sidebar.tsx:82-84</code></div>
+    <p><code>/system/communication</code> 与 <code>/system/gateway-status</code> 都 render <code>&lt;SystemGatewayStatus /&gt;</code>。侧边栏里「通讯状态图」和「网关通讯状态」是两个独立入口，点进去却是同一屏，且 <code>isActive</code> 用严格相等判断，两个菜单项不会同时高亮，会造成「我明明点的另一个」的困惑。</p>
+    <div class="fix"><b>修复：</b>拆成两个页面组件，或直接删掉其中一个菜单项和路由。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">10</span><span class="item-title">看板统计卡片的 4 个 group-hover 效果全部失效</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/pages/Dashboard.tsx:310</code><code>:313</code><code>:352</code></div>
+    <p>子元素用了 <code>group-hover:opacity-70</code>、<code>group-hover:scale-110</code>、<code>group-hover:-translate-y-1</code>，但父级 div 的 className 是 <code>"stat-card overflow-hidden relative"</code>，<b>漏了 <code>group</code> 类</b>。Tailwind 的 <code>group-hover</code> 依赖祖先带 <code>group</code>，缺失后这些悬停特效永远不会触发。（同文件 420/429 行的告警卡片是对的，有 <code>group</code>。）</p>
+    <div class="fix"><b>修复：</b>第 310 行改为 <code>className="stat-card group overflow-hidden relative"</code>。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">11</span><span class="item-title">暗色模式是死代码</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/hooks/useTheme.ts</code>（全项目 0 引用）</div>
+    <p>写好了 <code>useTheme</code> hook，<code>tailwind.config.js</code> 也配了 <code>darkMode: "class"</code>，但没有任何组件调用它——没有任何切换入口，也没有在 <code>documentElement</code> 上挂过 <code>dark</code> 类。整套暗色能力实际不可达。</p>
+    <div class="fix"><b>修复：</b>要么在 <code>Layout</code> 顶栏加一个切换按钮接上，要么删掉该 hook 与相关配置。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">12</span><span class="item-title">大面积「假交互」：按钮无响应、下拉框不过滤</span><span class="badge b2">P2</span></div>
+    <p>分为两类，都属于「控件在、功能不在」：</p>
+    <p><b>① 按钮无 onClick（12 处）：</b></p>
+    <ul class="plain">
+      <li><code>SystemPrice.tsx:149</code> 删除 · <code>:269</code> 保存（保存只关弹窗）</li>
+      <li><code>EnergyWarning.tsx:102</code> 保存配置</li>
+      <li><code>ParameterQuery.tsx:74/77/97/101</code> 查询 / 刷新 / 筛选 / 导出</li>
+      <li><code>OfflineEvents.tsx:12</code> 刷新 · <code>SmsLog.tsx:75/79</code> 筛选 / 配置接收人</li>
+      <li><code>AlarmClassification.tsx:103</code> 编辑配置</li>
+      <li><code>StatisticsMeterReading.tsx:44</code> 导出报表</li>
+      <li><code>SystemMeterStatus.tsx:106</code>、<code>SystemGatewayStatus.tsx:155</code> 刷新状态</li>
+      <li><code>Dashboard.tsx:420</code> 查看全部（未做跳转）</li>
+    </ul>
+    <p><b>② 下拉 / 日期选择器只改 state，不影响数据（7 页）：</b></p>
+    <table>
+      <thead><tr><th>文件</th><th>失效控件</th></tr></thead>
+      <tbody>
+        <tr><td><code>AlarmAnalysis.tsx:24</code></td><td>时间范围（本周/本月/季度/年）</td></tr>
+        <tr><td><code>AnalysisLoss.tsx:5</code></td><td>月份选择</td></tr>
+        <tr><td><code>AnalysisMOM.tsx:5</code></td><td>月份选择</td></tr>
+        <tr><td><code>AnalysisMaxDemand.tsx:5</code></td><td>月份选择</td></tr>
+        <tr><td><code>AnalysisYOY.tsx:5</code></td><td>年份选择</td></tr>
+        <tr><td><code>StatisticsMeterReading.tsx:5</code></td><td>月份选择</td></tr>
+        <tr><td><code>StatisticsTimeSegment.tsx:5</code></td><td>日期选择</td></tr>
+      </tbody>
+    </table>
+    <div class="fix"><b>修复：</b>建议统一抽一个「按时间维度取数」的 mock 层（如 <code>getEnergyData(period)</code>），让这些选择器真正参与计算；否则先把控件置灰或标注「暂未开放」，避免评审时被当成 bug。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">13</span><span class="item-title">硬编码统计数字与表格明细对不上</span><span class="badge b2">P2</span></div>
+    <ul class="plain">
+      <li><code>OfflineEvents.tsx:26</code> — 卡片写「本月离线 12 次」，表格实际只有 <b>2 条</b>记录</li>
+      <li><code>StatisticsMeterReading.tsx:114-126</code> — 「抄表明细」12 行设备名全是「主配电柜」，与上方 4 台设备的 <code>meterData</code> 不符</li>
+      <li><code>ClassifiedEnergy.tsx:103/107</code> — 「单位能耗」所有分类都写死 <code>125 kWh/吨纸</code>；「同比」恒为 <code>-3.2%</code></li>
+      <li><code>StatisticsSupplement.tsx:58/69/80</code> — 12 / 3 / 9 三个统计数字与下方 3 条记录无关</li>
+      <li><code>AnalysisMaxDemand.tsx:19</code> — <code>avgDemand: 608</code>，而采样序列均值实为 ≈609.3</li>
+      <li><code>AnalysisFlow.tsx:7-11</code> 与 <code>ClassifiedEnergy</code> 同源数据不一致（配电室 18000 vs 22000、办公楼 9000 vs 18000）</li>
+      <li><code>AlarmAnalysis.tsx:158-164</code> — 「其他」<code>count:10</code> 却标 <code>percentage:4</code>，与总数 386 推算不符</li>
+    </ul>
+    <div class="fix"><b>修复：</b>统一从 <code>mockData.ts</code> 派生统计值（<code>reduce</code> / <code>length</code>），禁止在页面里手写与明细脱钩的常量。这一条是「演示数据可信度」的核心，建议优先处理。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">14</span><span class="item-title">阈值大小关系颠倒、单位量纲错误、符号相反</span><span class="badge b2">P2</span></div>
+    <ul class="plain">
+      <li><code>EnergyWarning.tsx:15</code> — 电压阈值 <code>warning: 10.2</code> <b>大于</b> <code>critical: 10</code>，且 <code>critical</code> 等于下限 <code>min: 10</code>，逻辑彻底反了（对比其他三行都是 warning &lt; critical）</li>
+      <li><code>AnalysisLoss.tsx:83</code> — <code>(item.value / 1000).toFixed(1) kWh</code>，原值本身已是 kWh，除以 1000 后单位仍标 kWh，量纲错</li>
+      <li><code>AnalysisLoss.tsx:20-27</code> — 月度 <code>target: 7.5</code>，而四个分项目标合计 5.0+3.0+0.8+1.0 = <b>9.8</b>，导致「9.7% 超标」的结论建立在错误基准上</li>
+      <li><code>StatisticsPowerFactor.tsx:112-123</code> — 调整比例与调整电费符号相反：<code>0.92</code>（良好）显示 <code>-0.75%</code> 却配 <code>+¥500</code>；<code>0.88</code> 显示 <code>+2%</code> 却配 <code>-¥1,200</code>。另 <code>:105</code> 的 <code>0.85</code> 被判为 <code>bad</code> 红色，却命中了 <code>&gt;= 0.85</code> 的黄色分支</li>
+      <li><code>StatisticsWaterFee.tsx:119-133</code> — 单价明细 4.50+1.20+0.80 = <b>6.50 元/吨</b>，但月度合计只按 5.7 元/吨 算，漏掉水资源费</li>
+      <li><code>EnergyWarning.tsx:157-166</code> — 阈值条的 yellow 与 red 都 <code>absolute left:0</code> 叠加，red 宽度普遍更大直接盖住预警区</li>
+      <li><code>PowerDistribution.tsx:55</code> — 负载率一律 <code>current / 500 * 100</code>，500A 对所有设备硬编码，口径可疑</li>
+      <li><code>SystemPrice.tsx:6</code> — <code>typeof priceData[0]</code> 引用了第 18 行才声明的变量，类型位置合法但极其脆弱</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">15</span><span class="item-title">涨跌配色与趋势语义不符</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/pages/AlarmAnalysis.tsx:74-75</code><code>:113-116</code></div>
+    <p>统一按 <code>trend === 'up' ? green : red</code> 上色，但业务语义是反的：平均响应时间 <code>-15%</code>（变快，是好事）被标红；重复告警率 <code>+2%</code>（恶化）被标绿。</p>
+    <p>另外，按国内用户习惯，「涨」应使用<b>红色</b>、「跌」使用<b>绿色</b>，而 <code>Dashboard.tsx:327-335</code> 目前是 <code>positive → 绿 + TrendingUp</code>，属于欧美配色习惯，建议统一。</p>
+    <div class="fix"><b>修复：</b>把「指标方向」与「颜色」解耦——由每个指标显式声明 <code>isGood: boolean</code>，绿色代表改善、红色代表恶化；涉及金额涨跌时再遵循国内红涨绿跌的惯例。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">16</span><span class="item-title">列表过滤为空时全空白，无空状态提示</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>EquipmentManagement.tsx</code><code>ParameterQuery.tsx:117-132</code><code>SmsLog.tsx:95</code><code>SystemMeterStatus.tsx:128-163</code><code>SystemGatewayStatus.tsx</code></div>
+    <p><code>&lt;tbody&gt;</code> 直接 <code>map</code>，命中 0 条时表格只剩表头，用户无法判断「是没数据还是搜错了」。项目里其实已有 <code>src/components/Empty.tsx</code>，但没有一处引用它。</p>
+    <div class="fix"><b>修复：</b>统一加 <code>{list.length === 0 &amp;&amp; &lt;Empty /&gt;}</code> 分支。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">17</span><span class="item-title">图表数据源设计：模块级随机常量 + 时间标签会重复</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/data/mockData.ts:30-66</code></div>
+    <p><code>powerChartData</code> / <code>waterChartData</code> 是模块级 <code>const</code>，随机数在模块加载时一次性生成，之后永不变动——所以「实时更新中」的横幅名不副实，且多个页面共享同一份数据。</p>
+    <p><code>generateTimeLabels(24)</code> 只输出 <code>HH:00</code>，24 个点跨整整一天，会出现两次相同的 <code>11:00</code>，X 轴标签重复。</p>
+    <div class="fix"><b>修复：</b>改为 <code>getPowerChartData()</code> 函数按需生成；标签补上日期或在跨天时切成 <code>MM-DD HH:00</code>。若要真正的「实时」，用 <code>setInterval</code> 在 useEffect 里推进。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">18</span><span class="item-title">移动端首次进入即弹侧边栏 + 半透明遮罩</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/components/Layout.tsx:7</code><code>:24-26</code><code>:38-43</code></div>
+    <p><code>sidebarOpen</code> 初始为 <code>true</code>，但小屏下侧边栏是 <code>fixed inset-0</code> 全屏遮罩式布局，导致每次进页面首屏都被遮罩挡住，必须先点一下关闭。</p>
+    <div class="fix"><b>修复：</b>用 <code>window.matchMedia('(min-width: 1024px)')</code> 决定初始值，小屏默认 <code>false</code>。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">19</span><span class="item-title">侧边栏「退出登录」不贴底，mt-auto 无效</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/components/Sidebar.tsx:166</code><code>:263</code></div>
+    <p>退出按钮容器用了 <code>mt-auto</code>，但父级 <code>&lt;nav&gt;</code> 是 <code>overflow-y-auto</code> 的普通块级容器，不是 flex column，<code>margin-top: auto</code> 不生效，按钮会紧跟在最后一个菜单项后面而不是沉到底部。</p>
+    <div class="fix"><b>修复：</b><code>&lt;nav&gt;</code> 加 <code>flex flex-col</code>。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">20</span><span class="item-title">数组下标直接取值，无越界保护</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>src/pages/Transformer.tsx:9</code></div>
+    <p><code>transformerData[selectedTransformer]</code> 取出后立刻访问 <code>.temperature</code>，一旦数据源变空或索引越界就是运行时崩溃。同页 <code>:148-158</code> 的趋势图与所选变压器完全脱节（见第 3 条）。</p>
+    <div class="fix"><b>修复：</b>加 <code>const transformer = transformerData[selectedTransformer] ?? transformerData[0]</code>，并在为空时渲染空状态。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">21</span><span class="item-title">打包体积 1.27 MB 单文件，无路由级代码分割</span><span class="badge b2">P2</span></div>
+    <div class="loc"><code>vite.config.ts:8-10</code><code>src/routes.tsx</code></div>
+    <p>实测 <code>vite build</code> 产物：<code>index.js 1,272 KB（gzip 223 KB）</code>，Vite 已给出 chunk &gt; 500 kB 警告。31 个页面全部静态引入，Chart.js 也被打进主包，首屏必须等整包下载完。</p>
+    <div class="fix"><b>修复：</b>改用 <code>React.lazy()</code> + <code>Suspense</code> 做路由懒加载（可立省 60%+ 首屏体积）；或在 <code>build.rollupOptions.output.manualChunks</code> 里把 <code>chart.js</code> 单独拆包。</div>
+  </div>
+
+  <div class="item">
+    <div class="item-head"><span class="idx">22</span><span class="item-title">类型与工程配置的若干小问题</span><span class="badge b2">P2</span></div>
+    <ul class="plain">
+      <li><code>src/types/index.ts:73-81</code> — <code>ChartData</code> 接口定义了但全项目零引用</li>
+      <li><code>src/types/index.ts:42</code> — <code>Alarm.resolved_at</code> 是必填 <code>string</code>，未解决时只能填 <code>''</code>，语义上应为可选</li>
+      <li><code>src/hooks/useTheme.ts:7</code> — <code>localStorage.getItem('theme') as Theme</code> 属于不安全断言，存了别的字符串就会带着非法值往下走</li>
+      <li><code>tsconfig.json:19-24</code> — <code>strict: false</code>、<code>noUnusedLocals: false</code> 等全部关掉，是 18 处未使用变量能长期存活的根因</li>
+      <li><code>index.html:7</code> — 页面标题仍是脚手架默认的 <code>My Trae Project</code></li>
+      <li><code>src/routes.tsx:34</code> — <code>ProtectedRoute</code> 与 <code>router</code> 同文件导出，触发 react-refresh 的 only-export-components 警告</li>
+      <li>全项目 <code>key={index}</code> 共 29 处，其中带筛选/增删的表格（<code>EquipmentManagement</code>、<code>StatisticsOperation</code>）建议改用业务 id</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== Lint ===================== -->
+<section>
+  <h2 class="sec">附：ESLint 结果（18 error / 1 warning）</h2>
+  <p class="sec-desc">全部为「已定义未使用」，属清理项，无逻辑影响。</p>
+  <table>
+    <thead><tr><th>文件</th><th>未使用的标识符</th></tr></thead>
+    <tbody>
+      <tr><td><code>AlarmAnalysis.tsx:12</code></td><td>Filter</td></tr>
+      <tr><td><code>AnalysisFlow.tsx:1</code></td><td>Zap, Droplets, Factory</td></tr>
+      <tr><td><code>AnalysisLoss.tsx:2,40</code></td><td>Activity, totalLoss</td></tr>
+      <tr><td><code>AnalysisMOM.tsx:23</code></td><td>lastMonth</td></tr>
+      <tr><td><code>AnalysisStatus.tsx:1</code></td><td>Clock, TrendingUp</td></tr>
+      <tr><td><code>Dashboard.tsx:9-10</code></td><td>ArrowUpRight, ArrowDownRight</td></tr>
+      <tr><td><code>EnergyWarning.tsx:2</code></td><td>TrendingUp</td></tr>
+      <tr><td><code>StatisticsElectricFee.tsx:1</code></td><td>Calendar</td></tr>
+      <tr><td><code>StatisticsMeterReading.tsx:2</code></td><td>FileText, Filter</td></tr>
+      <tr><td><code>StatisticsOperation.tsx:1</code></td><td>Clock</td></tr>
+      <tr><td><code>SystemMeterStatus.tsx:2</code></td><td>Filter</td></tr>
+      <tr><td><code>Transformer.tsx:149</code></td><td>baseTemp</td></tr>
+      <tr><td><code>routes.tsx:34</code></td><td>⚠️ warning: react-refresh only-export-components</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===================== 计划 ===================== -->
+<section>
+  <h2 class="sec">建议的修复顺序</h2>
+  <table>
+    <thead><tr><th style="width:56px">批次</th><th>内容</th><th style="width:200px">影响</th></tr></thead>
+    <tbody>
+      <tr><td><b>第 1 批</b></td><td>第 1 条（改掉 3 个 <code>'600'</code>）</td><td>解开构建阻塞，3 处字符改动</td></tr>
+      <tr><td><b>第 2 批</b></td><td>第 2 / 3 / 4 / 5 / 6 条</td><td>修掉数据自相矛盾与核心交互失效</td></tr>
+      <tr><td><b>第 3 批</b></td><td>第 7 / 9 / 10 / 11 / 12 条</td><td>打通数据同源、清理死代码与重复路由</td></tr>
+      <tr><td><b>第 4 批</b></td><td>第 13-22 条 + ESLint 清理</td><td>统一数据口径与视觉规范</td></tr>
+      <tr><td><b>第 5 批</b></td><td>路由懒加载 + <code>manualChunks</code></td><td>首屏体积优化</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  本报告由静态代码审查得出：<code>tsc -b --noEmit</code>（退出码 1，3 个错误）、<code>eslint .</code>（18 error / 1 warning）、<code>vite build</code>（通过，1.27 MB）以及 src/ 全部文件的逐行人工审查。未修改任何源码文件。
+</footer>
+
+</div>
+</body>
+</html>

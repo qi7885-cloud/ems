@@ -1,100 +1,129 @@
-import { Activity, Zap, Droplets, Factory, ArrowRight } from 'lucide-react';
+import { useMemo } from 'react';
+import { Activity, ArrowDown, ArrowUp, Network, Zap } from 'lucide-react';
+import { categoryEnergyData } from '../data/mockData';
+import PageHeader from '../components/PageHeader';
+import Panel from '../components/Panel';
+import MetricStrip from '../components/MetricStrip';
+import Empty from '../components/Empty';
+
+// 与全站语义色一致的循环取色：强调青 / 信息蓝 / 正常绿 / 预警橙 / 紫。
+// 分支数量固定为 5，写成一处常量，能流图与明细列表共用同一套颜色。
+const BRANCH_COLORS = ['#22d3ee', '#38bdf8', '#34d399', '#f5a524', '#a78bfa'];
 
 export default function AnalysisFlow() {
-  const energyFlow = [
-    { source: '电网', value: 100000, unit: 'kWh', color: 'bg-blue-500' },
-    { source: '变压器A', value: 55000, unit: 'kWh', color: 'bg-yellow-500' },
-    { source: '变压器B', value: 45000, unit: 'kWh', color: 'bg-orange-500' },
-    { source: '造纸车间', value: 45000, unit: 'kWh', color: 'bg-green-500' },
-    { source: '水处理车间', value: 28000, unit: 'kWh', color: 'bg-cyan-500' },
-    { source: '配电室', value: 18000, unit: 'kWh', color: 'bg-purple-500' },
-    { source: '办公楼', value: 9000, unit: 'kWh', color: 'bg-pink-500' },
-  ];
+  // 与「分类能耗」页共用同一份 categoryEnergyData，避免两处流向数值不一致
+  // 按 power 降序展示各分支流向
+  const branches = useMemo(() => [...categoryEnergyData].sort((a, b) => b.power - a.power), []);
+
+  const totalPower = useMemo(() => branches.reduce((sum, item) => sum + item.power, 0), [branches]);
+  // 能流图条形宽度基准取最大分支，不写死像素
+  const maxPower = branches.length > 0 ? branches[0].power : 1;
+  const minPower = branches.length > 0 ? branches[branches.length - 1].power : 0;
+
+  // 明细占比 = 分支 / 总输入；前 n-1 项四舍五入，最后一项用 100 减前面之和兜底，
+  // 保证各分支占比之和恒等于 100%。
+  const shares = useMemo(() => {
+    let acc = 0;
+    return branches.map((item, index) => {
+      const share =
+        index === branches.length - 1
+          ? 100 - acc
+          : Math.round((item.power / totalPower) * 100);
+      acc += share;
+      return share;
+    });
+  }, [branches, totalPower]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">能源流向图</h1>
-        <p className="text-gray-500 mt-1">可视化展示能源从源头到各消耗端的流动情况</p>
-      </div>
+    <div className="space-y-3">
+      <PageHeader title="能源流向图" description="可视化展示能源从源头到各消耗端的流动情况" />
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">能源流向示意图</h2>
-        <div className="relative">
-          <div className="flex flex-col items-center">
-            <div className="w-32 h-16 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold mb-4">
-              电网输入
-            </div>
-            <ArrowRight className="w-6 h-6 text-gray-400 rotate-90 mb-4" />
-            <div className="flex gap-8">
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-12 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-bold">
-                  变压器A
-                </div>
-                <span className="text-sm text-gray-500 mt-2">55,000 kWh</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
-                  变压器B
-                </div>
-                <span className="text-sm text-gray-500 mt-2">45,000 kWh</span>
-              </div>
-            </div>
-            <ArrowRight className="w-6 h-6 text-gray-400 rotate-90 mb-4 mt-4" />
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
-                  造纸车间
-                </div>
-                <span className="text-xs text-gray-500 mt-1">45,000 kWh</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-10 bg-cyan-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
-                  水处理车间
-                </div>
-                <span className="text-xs text-gray-500 mt-1">28,000 kWh</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
-                  配电室
-                </div>
-                <span className="text-xs text-gray-500 mt-1">18,000 kWh</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-10 bg-pink-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
-                  办公楼
-                </div>
-                <span className="text-xs text-gray-500 mt-1">9,000 kWh</span>
-              </div>
-            </div>
+      <MetricStrip
+        cols={4}
+        items={[
+          { label: '总输入', value: totalPower, unit: 'kWh', icon: Zap, note: '各分支之和' },
+          { label: '分支数', value: branches.length, unit: '路', icon: Network, note: '在用分支' },
+          {
+            label: '最大分支',
+            value: maxPower,
+            unit: 'kWh',
+            icon: ArrowUp,
+            tone: 'accent',
+            note: branches[0]?.category ?? '—',
+          },
+          {
+            label: '最小分支',
+            value: minPower,
+            unit: 'kWh',
+            icon: ArrowDown,
+            note: branches[branches.length - 1]?.category ?? '—',
+          },
+        ]}
+      />
+
+      <Panel title="能源流向示意图" aside={<span className="font-mono text-[11px]">单位 kWh</span>} flush>
+        <div className="flex flex-col items-center px-4 py-5">
+          {/* 电源节点：唯一入口，控制青高亮 */}
+          <div className="inline-flex items-center gap-2 rounded border border-accent/40 bg-accent/10 px-6 py-3 text-accent">
+            <Zap className="h-4 w-4" />
+            <span className="font-mono text-[14px] font-semibold">{totalPower.toLocaleString()}</span>
+            <span className="text-[12px] text-ink-3">kWh · 电网总输入</span>
           </div>
-        </div>
-      </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">流向数据明细</h2>
-        <div className="space-y-3">
-          {energyFlow.map((item, index) => (
-            <div key={index} className="flex items-center gap-4">
-              <div className={`w-10 h-10 ${item.color} rounded-lg flex items-center justify-center text-white`}>
-                <Activity className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900">{item.source}</span>
-                  <span className="text-gray-600">{item.value.toLocaleString()} {item.unit}</span>
-                </div>
-                <div className="mt-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+          <ArrowDown className="my-3 h-5 w-5 text-ink-3" aria-hidden="true" />
+
+          <div className="w-full max-w-3xl space-y-2">
+            {branches.map((item, index) => (
+              <div key={item.category} className="flex items-center gap-3">
+                <span className="w-24 shrink-0 truncate text-right text-[12px] text-ink-2">{item.category}</span>
+                {/* 分支节点：凹陷底 + 常规边框；填充宽度仍按 power / 最大分支 的比例 */}
+                <div className="h-8 flex-1 overflow-hidden rounded-sm border border-line bg-inset">
                   <div
-                    className={`h-full ${item.color} rounded-full`}
-                    style={{ width: `${(item.value / 100000) * 100}%` }}
+                    className="h-full rounded-sm"
+                    style={{
+                      width: `${(item.power / maxPower) * 100}%`,
+                      backgroundColor: BRANCH_COLORS[index % BRANCH_COLORS.length],
+                    }}
                   />
                 </div>
+                <span className="w-24 shrink-0 text-right font-mono text-[12px] text-ink">
+                  {item.power.toLocaleString()}
+                </span>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </Panel>
+
+      <Panel title="流向数据明细" aside={<span className="font-mono text-[11px]">合计 {totalPower.toLocaleString()} kWh</span>} flush>
+        {branches.length === 0 ? (
+          <Empty title="暂无流向数据" description="请检查分类能耗采集是否正常" />
+        ) : (
+          <ul className="divide-y divide-line">
+            {branches.map((item, index) => (
+              <li key={item.category} className="flex items-center gap-3 px-4 py-2.5">
+                <span className="flex w-24 shrink-0 items-center gap-1.5 truncate text-[13px] text-ink">
+                  <Activity className="h-3.5 w-3.5 shrink-0 text-ink-3" />
+                  {item.category}
+                </span>
+                <div className="progress-bar flex-1">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${shares[index]}%`,
+                      backgroundColor: BRANCH_COLORS[index % BRANCH_COLORS.length],
+                    }}
+                  />
+                </div>
+                <span className="w-12 shrink-0 text-right font-mono text-[12px] text-ink-2">{shares[index]}%</span>
+                <span className="w-24 shrink-0 text-right font-mono text-[12px] text-ink">
+                  {item.power.toLocaleString()} kWh
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
     </div>
   );
 }
